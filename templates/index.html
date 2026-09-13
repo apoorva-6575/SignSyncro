@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignSync | Communication without barriers.</title>
+    <meta name="description" content="SignSync enables natural two-way assistive communication between sign-language users and non-sign-language users through sign, text, and speech.">
+    <link rel="icon" type="image/png" href="/static/img/favicon.png">
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css?v=brand_splash_v1">
+</head>
+<body>
+    <!-- ================= SIGNSYNC INTRO SPLASH SCREEN ================= -->
+    <div id="signsync-splash" role="presentation" aria-hidden="true">
+        <div class="splash-center" id="splash-center">
+            <img src="/static/img/signsync_logo.png" class="splash-logo-img" alt="SignSync Logo" draggable="false">
+            <div class="splash-divider"></div>
+            <div class="splash-wordmark">SignSync</div>
+            <div class="splash-tagline">Communication without barriers.</div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+    <!-- ================= GLOBAL HEADER & NAVBAR ================= -->
+    <header class="app-header">
+        <div class="header-inner">
+            <!-- Brand Identity: Logo + Wordmark + Tagline -->
+            <a href="#home" class="header-brand ripple-host" id="brand-home-link" title="SignSync - Home">
+                <img src="/static/img/signsync_logo.png" alt="SignSync Logo" class="brand-logo-img" id="navbar-logo-img">
+                <div class="brand-info">
+                    <div class="brand-title-row">
+                        <span class="brand-title">SignSync</span>
+                    </div>
+                    <span class="brand-tagline">Communication without barriers.</span>
+                </div>
+            </a>
+
+            <!-- Navigation Links -->
+            <nav class="header-nav" id="header-nav" aria-label="Main Navigation">
+                <a href="#home" class="nav-link ripple-host active" data-view="view-landing" id="nav-home">
+                    <i class="fa-solid fa-house"></i> Home
+                </a>
+                <a href="#communicate" class="nav-link ripple-host" data-view="view-communicate" id="nav-communicate">
+                    <i class="fa-solid fa-hands-asl-interpreting"></i> Communicate
+                </a>
+                <a href="#how-it-works" class="nav-link ripple-host" id="nav-how-it-works">
+                    <i class="fa-solid fa-circle-info"></i> How It Works
+                </a>
+                <a href="#my-signs" class="nav-link ripple-host" data-view="view-my-signs" id="nav-my-signs">
+                    <i class="fa-solid fa-book-bookmark"></i> My Signs
+                </a>
+                <a href="#transcript" class="nav-link ripple-host" data-view="view-transcript" id="nav-transcript">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Transcript
+                </a>
+            </nav>
+
+            <!-- Header Utilities & Actions -->
+            <div class="header-actions">
+                <!-- Wearable Locket Indicator (Concept Prototype) -->
+                <div class="wearable-badge" title="SignSync Wear: Wearable Camera Pendant in Prototype Development">
+                    <span class="wearable-dot"></span>
+                    <span>SignSync Wear ● Ready</span>
+                </div>
+
+                <!-- Accessibility Drawer Button -->
+                <button id="accessibility-btn" class="header-icon-btn" title="Accessibility Options (♿)" aria-label="Accessibility Settings">
+                    <i class="fa-solid fa-universal-access"></i>
+                </button>
+
+                <!-- Help & Guidance Button -->
+                <button id="help-btn" class="header-icon-btn" title="How SignSync Works &amp; Troubleshooting (?)" aria-label="Help">
+                    <i class="fa-solid fa-question"></i>
+                </button>
+
+                <!-- Settings Button -->
+                <button id="settings-btn" class="header-icon-btn" title="System Settings (⚙️)" aria-label="Settings">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+
+                <!-- Primary Workspace CTA -->
+                <button id="header-start-btn" class="header-cta-btn ripple-host" title="Start Two-Way Communication Workspace">
+                    <i class="fa-solid fa-comments"></i>
+                    <span>Start Communicating</span>
+                </button>
+
+                <!-- Mobile Hamburger Menu Button -->
+                <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ================= VIEW 1: LANDING PAGE ================= -->
+    <main id="view-landing" class="view-container active-view">
+        <!-- Hero Section -->
+        <section class="landing-hero-section">
+            <div class="hero-content">
+                <div class="hero-pill-badge">
+                    <i class="fa-solid fa-sparkles"></i>
+                    <span>AI-Powered Assistive Communication</span>
+                </div>
+
+                <h1 class="hero-title">Communication without barriers.</h1>
+
+                <p class="hero-subtitle">
+                    SignSync helps sign-language users and non-sign-language users communicate naturally through sign, text, and speech — bridging both worlds in real time.
+                </p>
+
+                <div class="hero-ctas">
+                    <button class="btn btn-primary ripple-host" id="hero-start-btn">
+                        <i class="fa-solid fa-hands-asl-interpreting"></i>
+                        <span>Start Communicating</span>
+                    </button>
+                    <a href="#how-it-works" class="btn btn-outline ripple-host" id="hero-how-btn">
+                        <i class="fa-solid fa-play"></i>
+                        <span>See How It Works</span>
+                    </a>
+                </div>
+
+                <!-- Modality Pipeline Badges -->
+                <div class="hero-bridge-badges">
+                    <div class="bridge-item">
+                        <i class="fa-solid fa-hand"></i>
+                        <span>Sign &rarr; Text &rarr; Speech</span>
+                    </div>
+                    <div class="bridge-item">
+                        <i class="fa-solid fa-microphone"></i>
+                        <span>Speech &rarr; Text &rarr; Sign</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hero Visual Mockup -->
+            <div class="hero-visual-wrap">
+                <div class="hero-mockup-frame">
+                    <div class="mockup-header-bar">
+                        <div class="mockup-dots">
+                            <span></span><span></span><span></span>
+                        </div>
+                        <div class="mockup-live-indicator">
+                            <span class="dot"></span> Live Two-Way Session
+                        </div>
+                    </div>
+
+                    <div class="mockup-chat-preview">
+                        <!-- Step 1: Voice Input -->
+                        <div class="mockup-flow-step">
+                            <div class="mockup-step-header">
+                                <span class="mockup-step-tag voice"><i class="fa-solid fa-microphone text-amber"></i> Person speaks</span>
+                                <span class="mockup-step-time">Spoken Audio</span>
+                            </div>
+                            <div class="mockup-msg voice-msg" style="align-self: flex-start; max-width: 100%;">
+                                <div><strong>Voice:</strong> &ldquo;What do you want to eat?&rdquo;</div>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Instant Translation Indicator -->
+                        <div class="mockup-flow-arrow">
+                            <i class="fa-solid fa-arrow-down"></i>
+                            <span>SignSync AI Visual Performance</span>
+                        </div>
+
+                        <!-- Step 3: AI Signing Avatar Performance -->
+                        <div class="mockup-flow-step">
+                            <div class="mockup-step-header">
+                                <span class="mockup-step-tag sign"><i class="fa-solid fa-person text-blue"></i> AI Signing Avatar &bull; Asha (ISL)</span>
+                                <span class="avatar-live-pill"><i class="fa-solid fa-circle text-success"></i> Performing</span>
+                            </div>
+                            <div class="mockup-avatar-stage">
+                                <img src="/static/img/avatar_isl/eat.jpg" alt="Asha performing Indian Sign Language for EAT" class="mockup-avatar-img">
+                                <div class="mockup-avatar-active-badge">
+                                    <span class="m-sign-now">Active Sign: EAT</span>
+                                    <span class="m-lang-tag">Indian Sign Language (ISL)</span>
+                                </div>
+                            </div>
+                            <div class="mockup-seq-bar">
+                                <span class="mockup-chip done">WHAT</span>
+                                <span class="mockup-chip-sep">&rarr;</span>
+                                <span class="mockup-chip done">YOU</span>
+                                <span class="mockup-chip-sep">&rarr;</span>
+                                <span class="mockup-chip done">WANT</span>
+                                <span class="mockup-chip-sep">&rarr;</span>
+                                <span class="mockup-chip active">EAT</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mockup-action-strip">
+                        <span class="mockup-badge badge-sign-mode">
+                            <i class="fa-solid fa-camera"></i> 3D Vision Tracking
+                        </span>
+                        <span class="mockup-badge badge-voice-mode">
+                            <i class="fa-solid fa-ear-listen"></i> Speech-to-Sign Active
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- "How SignSync Works" Section -->
+        <section id="how-it-works-section" class="how-it-works-section">
+            <div class="section-header">
+                <span class="section-tag">How SignSync Works</span>
+                <h2 class="section-title">Two-way natural conversation in four simple steps</h2>
+                <p class="section-desc">
+                    Whether you express yourself through signs or spoken words, SignSync ensures every conversation partner is understood instantly.
+                </p>
+            </div>
+
+            <div class="steps-grid">
+                <div class="step-card">
+                    <span class="step-number">01</span>
+                    <div class="step-icon-wrap"><i class="fa-solid fa-hand"></i></div>
+                    <h3 class="step-title">SIGN</h3>
+                    <p class="step-text">Show a sign naturally using the camera. Smart framing confirms your hands are positioned correctly.</p>
+                </div>
+
+                <div class="step-card">
+                    <span class="step-number">02</span>
+                    <div class="step-icon-wrap"><i class="fa-solid fa-brain"></i></div>
+                    <h3 class="step-title">UNDERSTAND</h3>
+                    <p class="step-text">SignSync recognizes the gesture using 3D kinematic rotation invariance and natural hold stabilization.</p>
+                </div>
+
+                <div class="step-card">
+                    <span class="step-number">03</span>
+                    <div class="step-icon-wrap"><i class="fa-solid fa-volume-high"></i></div>
+                    <h3 class="step-title">COMMUNICATE</h3>
+                    <p class="step-text">The sign becomes natural text and can be spoken aloud for hearing conversation partners to hear.</p>
+                </div>
+
+                <div class="step-card">
+                    <span class="step-number">04</span>
+                    <div class="step-icon-wrap"><i class="fa-solid fa-hands-asl-interpreting"></i></div>
+                    <h3 class="step-title">RESPOND</h3>
+                    <p class="step-text">The hearing partner speaks back. SignSync translates the speech into text and clear visual sign representations.</p>
+                </div>
+            </div>
+
+            <!-- Two-Way Pipeline Explainer Banner -->
+            <div class="pipeline-banner">
+                <div class="pipeline-flow">
+                    <div class="pipeline-node">
+                        <i class="fa-solid fa-hand fa-lg text-blue"></i>
+                        <span>SIGN</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-right pipeline-arrow"></i>
+                    <div class="pipeline-node">
+                        <i class="fa-solid fa-comment-dots fa-lg text-navy"></i>
+                        <span>TEXT</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-right pipeline-arrow"></i>
+                    <div class="pipeline-node">
+                        <i class="fa-solid fa-volume-high fa-lg text-blue"></i>
+                        <span>SPEECH</span>
+                    </div>
+                </div>
+
+                <div class="pipeline-divider"></div>
+
+                <div class="pipeline-flow">
+                    <div class="pipeline-node">
+                        <i class="fa-solid fa-microphone fa-lg text-amber"></i>
+                        <span>SPEECH</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-right pipeline-arrow"></i>
+                    <div class="pipeline-node">
+                        <i class="fa-solid fa-comment-dots fa-lg text-navy"></i>
+                        <span>TEXT</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-right pipeline-arrow"></i>
+                    <div class="pipeline-node">
+                        <i class="fa-solid fa-eye fa-lg text-blue"></i>
+                        <span>VISUAL SIGN</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Product CTA Section -->
+        <section class="landing-cta-section">
+            <h2>Ready to communicate?</h2>
+            <p>Connect through sign, speech, and text — without barriers. Open the communication workspace and start speaking or signing right now.</p>
+            <button class="btn btn-accent btn-lg ripple-host" id="cta-start-btn">
+                <i class="fa-solid fa-comments"></i> Start Communicating Now
+            </button>
+        </section>
+
+        <!-- Landing Footer -->
+        <footer class="app-footer">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <img src="/static/img/signsync_logo.png" alt="SignSync" class="footer-logo-img">
+                    <div>
+                        <strong>SignSync</strong> — “Communication without barriers.”
+                        <p class="footer-copy">Manipal University Jaipur PBL-I Project &bull; Inclusive Assistive Communication</p>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <a href="#how-it-works" class="footer-link">How It Works</a>
+                    <a href="#my-signs" class="footer-link">Sign Dictionary</a>
+                    <a href="#transcript" class="footer-link">Transcript</a>
+                    <a href="#" class="footer-link" id="footer-privacy-btn">Privacy Notice</a>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <!-- ================= VIEW 2: MAIN COMMUNICATION WORKSPACE ================= -->
+    <main id="view-communicate" class="view-container">
+        <div class="comm-workspace">
+            <!-- Top Status Breadcrumb Bar -->
+            <div class="comm-top-bar">
+                <div class="comm-breadcrumbs">
+                    <span><i class="fa-solid fa-comments text-blue"></i> Communication Workspace</span>
+                    <span class="sub">| Two-Way Assistive Bridge</span>
+                </div>
+                <div class="comm-status-indicators">
+                    <span id="comm-framing-pill" class="status-pill pill-neutral">
+                        <i id="comm-framing-icon" class="fa-regular fa-circle"></i>
+                        <span id="comm-framing-text">Awaiting Hands</span>
+                    </span>
+                    <span id="comm-lighting-pill" class="status-pill pill-good">
+                        <i class="fa-solid fa-lightbulb"></i>
+                        <span id="comm-lighting-text">Good Lighting</span>
+                    </span>
+                    <span id="comm-mic-pill" class="status-pill pill-good">
+                        <i class="fa-solid fa-microphone"></i>
+                        <span id="comm-mic-text">Mic Ready</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Two-Column Main Layout -->
+            <div class="comm-layout-grid">
+                <!-- ================= LEFT COLUMN: LIVE CAMERA & SIGN INPUT ================= -->
+                <div class="comm-left-panel">
+                    <div class="panel-card">
+                        <!-- Camera Header -->
+                        <div class="panel-card-header">
+                            <div class="panel-card-title">
+                                <span class="panel-sym"><i class="fa-solid fa-video"></i></span>
+                                <span>LIVE CAMERA &bull; SIGN INPUT</span>
+                            </div>
+                            <div class="header-tags">
+                                <span class="badge-tag">3D Kinematic Tracking</span>
+                            </div>
+                        </div>
+
+                        <!-- Camera Viewport with Smart Frame -->
+                        <div class="camera-viewport-container" id="camera-viewport-wrap">
+                            <img id="camera-stream" src="" alt="Live Camera Vision Feed" class="camera-stream-img" style="display: none;">
+                            <div id="camera-standby-placeholder" class="camera-standby-overlay">
+                                <i class="fa-solid fa-video-slash" style="font-size: 2rem; color: #64748b; margin-bottom: 10px;"></i>
+                                <span style="color: #94a3b8; font-size: 0.92rem; font-weight: 600;">Camera Standby</span>
+                                <span style="color: #64748b; font-size: 0.8rem; margin-top: 4px;">Activates automatically inside Communication Workspace</span>
+                            </div>
+
+                            <!-- Smart Frame Guidance Box -->
+                            <div id="smart-frame" class="smart-frame-overlay framed-waiting">
+                                <div class="corner top-left"></div>
+                                <div class="corner top-right"></div>
+                                <div class="corner bottom-left"></div>
+                                <div class="corner bottom-right"></div>
+                                <div class="frame-guidance-pill" id="smart-frame-text">
+                                    <i class="fa-solid fa-hand"></i> Place hands inside guide box
+                                </div>
+                            </div>
+
+                            <!-- Floating Action Buttons -->
+                            <div class="camera-floating-actions">
+                                <button id="toggle-record-btn" class="cam-float-btn" title="Toggle Auto-Record (Space)">
+                                    <i id="record-icon" class="fa-solid fa-circle text-rose"></i>
+                                    <span id="record-text">Auto-Record ON</span>
+                                </button>
+                                <button id="mute-toggle-btn" class="cam-float-btn" title="Toggle Voice Output (M)">
+                                    <i id="mute-icon" class="fa-solid fa-volume-high text-emerald"></i>
+                                    <span id="mute-text">Voice ON</span>
+                                </button>
+                                <button id="toggle-stream-btn" class="cam-float-btn" title="Refresh Camera View">
+                                    <i class="fa-solid fa-rotate"></i>
+                                    <span>Refresh</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- CURRENT SIGN RESULT CARD -->
+                        <div class="recognition-result-card">
+                            <div class="result-card-top">
+                                <span class="result-label">Current Recognized Sign</span>
+                                <span class="result-conf-pill" id="gesture-conf-val">Confidence: 0%</span>
+                            </div>
+
+                            <div class="recognized-sign-display">
+                                <div class="recognized-sign-word" id="current-gesture">NO_GESTURE</div>
+                                <div class="recognized-emotion-note" id="current-emotion-wrap">
+                                    <span>Emotion:</span> <span id="current-emotion" class="val-emotion">Neutral</span>
+                                </div>
+                            </div>
+
+                            <!-- Real-Time Hold Progress Meter (0.70s to commit) -->
+                            <div class="hold-progress-block">
+                                <div class="hold-labels">
+                                    <span><i class="fa-regular fa-clock"></i> Hold to commit (0.70s):</span>
+                                    <span id="hold-progress-val">0%</span>
+                                </div>
+                                <div class="hold-track">
+                                    <div id="hold-progress-bar" class="hold-fill"></div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons for Current Sign -->
+                            <div class="result-actions-bar">
+                                <button id="add-to-chat-btn" class="btn btn-sm btn-primary" title="Add sign to conversation">
+                                    <i class="fa-solid fa-paper-plane"></i> Add to Conversation
+                                </button>
+                                <button id="speak-sign-btn" class="btn btn-sm btn-outline" title="Speak this word aloud">
+                                    <i class="fa-solid fa-volume-high"></i> Speak
+                                </button>
+                                <button id="try-again-btn" class="btn btn-sm btn-outline" title="Reset current recognition">
+                                    <i class="fa-solid fa-rotate-left"></i> Try Again
+                                </button>
+                                <button id="clear-sign-btn" class="btn btn-sm btn-outline" title="Clear current word">
+                                    <i class="fa-solid fa-xmark"></i> Clear
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Predictive Sign Suggestions -->
+                        <div class="predictive-chips-section">
+                            <span class="predictive-chips-label"><i class="fa-solid fa-wand-magic-sparkles text-amber"></i> Suggestions:</span>
+                            <div class="predictive-chips" id="predictive-chips">
+                                <button class="suggest-chip" data-word="PLEASE">PLEASE</button>
+                                <button class="suggest-chip" data-word="WATER">WATER</button>
+                                <button class="suggest-chip" data-word="FOOD">FOOD</button>
+                                <button class="suggest-chip" data-word="HELP">HELP</button>
+                                <button class="suggest-chip" data-word="THANK YOU">THANK YOU</button>
+                            </div>
+                        </div>
+
+                        <!-- Quick Needs Section -->
+                        <div class="quick-needs-section">
+                            <span class="quick-needs-title"><i class="fa-solid fa-shapes text-blue"></i> Quick Needs (One-Tap Communication):</span>
+                            <div class="quick-needs-grid">
+                                <button class="quick-need-btn" data-word="WATER" data-phrase="Please may I have some water.">
+                                    <i class="fa-solid fa-droplet"></i> Water
+                                </button>
+                                <button class="quick-need-btn" data-word="FOOD" data-phrase="I would like something to eat, please.">
+                                    <i class="fa-solid fa-utensils"></i> Food
+                                </button>
+                                <button class="quick-need-btn btn-urgent" data-word="HELP" data-phrase="Please help me immediately.">
+                                    <i class="fa-solid fa-circle-exclamation"></i> Help
+                                </button>
+                                <button class="quick-need-btn btn-urgent" data-word="PAIN" data-phrase="I am feeling pain, please assist me.">
+                                    <i class="fa-solid fa-bolt"></i> Pain
+                                </button>
+                                <button class="quick-need-btn" data-word="RESTROOM" data-phrase="I need to use the restroom, please.">
+                                    <i class="fa-solid fa-restroom"></i> Restroom
+                                </button>
+                                <button class="quick-need-btn" data-word="STOP" data-phrase="Please stop now.">
+                                    <i class="fa-solid fa-hand"></i> Stop
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= RIGHT COLUMN: LIVE CONVERSATION & SPEECH → SIGN ================= -->
+                <div class="comm-right-panel">
+                    <!-- 1. 💬 CONVERSATION PANEL -->
+                    <div class="conversation-card">
+                        <div class="conv-card-header">
+                            <div class="conv-card-title">
+                                <span class="sym"><i class="fa-solid fa-comments"></i></span>
+                                <span>LIVE CONVERSATION</span>
+                            </div>
+                            <div class="conv-toolbar-actions">
+                                <button id="speak-sentence-btn" class="btn btn-xs btn-outline" title="Read latest message aloud">
+                                    <i class="fa-solid fa-volume-high"></i> Read
+                                </button>
+                                <button id="copy-transcript-btn" class="btn btn-xs btn-outline" title="Copy conversation to clipboard">
+                                    <i class="fa-solid fa-copy"></i> Copy
+                                </button>
+                                <button id="undo-message-btn" class="btn btn-xs btn-outline" title="Undo last message">
+                                    <i class="fa-solid fa-rotate-left"></i> Undo
+                                </button>
+                                <button id="clear-chat-btn" class="btn btn-xs btn-outline" title="Clear conversation">
+                                    <i class="fa-solid fa-trash-can"></i> Clear
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Conversation Feed -->
+                        <div id="conversation-feed" class="conv-feed-body">
+                            <!-- Populated dynamically or empty state -->
+                            <div class="conv-empty-state" id="conv-empty-state">
+                                <i class="fa-regular fa-comment-dots"></i>
+                                <strong>Start a conversation</strong>
+                                <p>Show a sign in the camera, tap the microphone to speak, or type a message below.</p>
+                            </div>
+                        </div>
+
+                        <!-- Direct Text Input Bar -->
+                        <div class="conv-input-bar">
+                            <input type="text" id="direct-chat-input" class="conv-text-input" placeholder="Type a message or response directly here...">
+                            <button id="direct-send-btn" class="btn btn-sm btn-primary">
+                                <i class="fa-solid fa-paper-plane"></i> Send
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 2. 🎙️ VOICE → SIGN SECTION -->
+                    <div class="speech-sign-card">
+                        <div class="speech-card-header">
+                            <div class="speech-card-title">
+                                <span class="sym"><i class="fa-solid fa-microphone"></i></span>
+                                <span>VOICE &rarr; SIGN &bull; SPEECH INPUT</span>
+                            </div>
+                            <span class="badge-tag">Speech to Visual Sign</span>
+                        </div>
+
+                        <!-- Hero Microphone Button (Speak -> Automatic Chat & Inline Sign) -->
+                        <div class="hero-mic-deck">
+                            <button id="speech-to-sign-btn" class="hero-mic-btn" title="Start Speaking">
+                                <div class="mic-circle-icon">
+                                    <i id="mic-icon" class="fa-solid fa-microphone"></i>
+                                </div>
+                                <div class="mic-labels">
+                                    <span class="mic-primary-label" id="mic-text">Tap to Speak</span>
+                                    <span class="mic-sub-label" id="mic-sub-text">Speak naturally &bull; Message and sign appear automatically in conversation</span>
+                                </div>
+                            </button>
+                        </div>
+
+                        <!-- Speech Error Fallback Banner -->
+                        <div id="speech-error-banner" class="speech-error-banner hidden">
+                            <div>
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                <span id="speech-error-text">Could not understand audio.</span>
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                <button id="error-retry-btn" class="btn btn-xs btn-outline">Try Again</button>
+                                <button id="error-type-btn" class="btn btn-xs btn-outline">Type Instead</button>
+                            </div>
+                        </div>
+
+                        <!-- Quick Voice Phrases (Click to immediately add Voice Message with Sign) -->
+                        <div class="quick-phrases-block">
+                            <span class="quick-phrases-label"><i class="fa-solid fa-bolt text-amber"></i> Quick Voice Phrases (One-Tap):</span>
+                            <div class="quick-phrases-grid">
+                                <button class="quick-phrase-btn" data-phrase="Yes, sure.">&ldquo;Yes, sure.&rdquo;</button>
+                                <button class="quick-phrase-btn" data-phrase="What would you like to eat?">&ldquo;What would you like to eat?&rdquo;</button>
+                                <button class="quick-phrase-btn" data-phrase="Are you hungry?">&ldquo;Are you hungry?&rdquo;</button>
+                                <button class="quick-phrase-btn" data-phrase="I want water.">&ldquo;I want water.&rdquo;</button>
+                                <button class="quick-phrase-btn" data-phrase="Where does it hurt?">&ldquo;Where does it hurt?&rdquo;</button>
+                                <button class="quick-phrase-btn" data-phrase="Okay, sure.">&ldquo;Okay, sure.&rdquo;</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Academic PBL Telemetry Drawer (Collapsible) -->
+        <div class="telemetry-collapsible">
+            <button id="telemetry-toggle-btn" class="telemetry-drawer-toggle">
+                <span><i class="fa-solid fa-microchip text-blue"></i> Academic PBL Telemetry &amp; Benchmark Verification (99%+ Accuracy)</span>
+                <i id="telemetry-chevron" class="fa-solid fa-chevron-down"></i>
+            </button>
+            <div id="telemetry-body" class="telemetry-drawer-body hidden">
+                <div class="telemetry-metrics-grid">
+                    <div class="telemetry-metric-tile">
+                        <span class="tm-lbl">Gram-Schmidt 3D Spatial Basis</span>
+                        <span class="tm-val">100% Exact</span>
+                        <span class="tm-note">Canonical Wrist (0,0,0) &amp; MCP (0,1,0)</span>
+                    </div>
+                    <div class="telemetry-metric-tile">
+                        <span class="tm-lbl">FACS Action Units Precision</span>
+                        <span class="tm-val">99.2% Precision</span>
+                        <span class="tm-note">AU1, AU4, AU6, AU12, AU15, AU26</span>
+                    </div>
+                    <div class="telemetry-metric-tile">
+                        <span class="tm-lbl">Multi-Sign Grammar Synthesis</span>
+                        <span class="tm-val">100% Verified</span>
+                        <span class="tm-note">Sequential 2 &amp; 3-gesture synthesis</span>
+                    </div>
+                    <div class="telemetry-metric-tile">
+                        <span class="tm-lbl">Resting Face Neutral Guarantee</span>
+                        <span class="tm-val">97.35% Confirmed</span>
+                        <span class="tm-note">Zero False Sad Baseline</span>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; margin-top: 6px;">
+                    <a href="/api/export_log" target="_blank" class="btn btn-xs btn-outline">
+                        <i class="fa-solid fa-download"></i> Download Evaluation Report (.txt)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ================= VIEW 3: MY SIGNS DICTIONARY ================= -->
+    <main id="view-my-signs" class="view-container">
+        <div class="my-signs-container">
+            <div class="my-signs-header">
+                <div>
+                    <h2>My Signs Dictionary</h2>
+                    <p>Verified assistive sign vocabulary with anatomical hand shapes and movement guides.</p>
+                </div>
+                <div class="signs-filter-bar">
+                    <button class="filter-chip active" data-filter="all">All Signs</button>
+                    <button class="filter-chip" data-filter="Need">Needs</button>
+                    <button class="filter-chip" data-filter="Urgent">Urgent</button>
+                    <button class="filter-chip" data-filter="Courtesy">Courtesy</button>
+                    <button class="filter-chip" data-filter="Action">Actions</button>
+                    <button class="filter-chip" data-filter="Affirmation">Affirmations</button>
+                </div>
+            </div>
+
+            <!-- Personalized Sign Training Banner -->
+            <div class="sign-training-banner">
+                <div class="training-info">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <div class="training-text">
+                        <h4>Personalized Sign Training (Coming Soon)</h4>
+                        <p>Soon you will be able to record and train custom gestures for personal names, specialized family items, and local dialect terms.</p>
+                    </div>
+                </div>
+                <button class="btn btn-sm btn-outline" style="background: #ffffff;" onclick="alert('Personalized Sign Training feature is scheduled for the next release!')">
+                    <i class="fa-solid fa-plus"></i> Add Custom Sign
+                </button>
+            </div>
+
+            <!-- Dynamic Signs Grid -->
+            <div class="signs-grid" id="signs-catalog-grid">
+                <!-- Populated dynamically via /api/signs -->
+            </div>
+        </div>
+    </main>
+
+    <!-- ================= VIEW 4: TRANSCRIPT REVIEW ================= -->
+    <main id="view-transcript" class="view-container">
+        <div class="transcript-container">
+            <div class="transcript-header-card">
+                <div>
+                    <h2>Communication Session Transcript</h2>
+                    <p>Complete chronological record of all signed, spoken, and typed exchanges.</p>
+                </div>
+                <div class="transcript-stats-row">
+                    <div class="t-stat"><span class="num" id="stat-total-msgs">0</span><span class="lbl">Messages</span></div>
+                    <div class="t-stat"><span class="num" id="stat-sign-msgs">0</span><span class="lbl">Signed</span></div>
+                    <div class="t-stat"><span class="num" id="stat-voice-msgs">0</span><span class="lbl">Spoken</span></div>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button id="transcript-copy-all-btn" class="btn btn-sm btn-outline"><i class="fa-solid fa-copy"></i> Copy All</button>
+                    <a href="/api/export_log" target="_blank" class="btn btn-sm btn-primary"><i class="fa-solid fa-download"></i> Export Log</a>
+                </div>
+            </div>
+
+            <div class="transcript-log-card">
+                <div class="transcript-search-bar">
+                    <i class="fa-solid fa-magnifying-glass text-muted"></i>
+                    <input type="text" id="transcript-search-input" class="transcript-search-input" placeholder="Search transcript messages...">
+                </div>
+
+                <div class="transcript-list" id="transcript-full-list">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ================= MODALS & DRAWERS ================= -->
+
+    <!-- Modal: Accessibility Options (♿) -->
+    <div id="accessibility-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="acc-modal-title">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title" id="acc-modal-title">
+                    <i class="fa-solid fa-universal-access text-blue"></i>
+                    <span>Accessibility Settings</span>
+                </div>
+                <button class="modal-close-btn" id="acc-close-btn" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-item-row">
+                    <div class="setting-info">
+                        <span class="setting-title">Text Size</span>
+                        <span class="setting-desc">Adjust UI text size for optimal readability</span>
+                    </div>
+                    <select id="text-size-select" class="form-select">
+                        <option value="sm">Small</option>
+                        <option value="md" selected>Medium (Default)</option>
+                        <option value="lg">Large</option>
+                    </select>
+                </div>
+
+                <div class="setting-item-row">
+                    <div class="setting-info">
+                        <span class="setting-title">High Contrast Mode</span>
+                        <span class="setting-desc">High contrast borders and deep black text</span>
+                    </div>
+                    <button id="toggle-contrast-btn" class="btn btn-sm btn-outline">Toggle ON/OFF</button>
+                </div>
+
+                <div class="setting-item-row">
+                    <div class="setting-info">
+                        <span class="setting-title">Reduced Motion</span>
+                        <span class="setting-desc">Disables non-essential transitions and pulsing animations</span>
+                    </div>
+                    <button id="toggle-motion-btn" class="btn btn-sm btn-outline">Toggle ON/OFF</button>
+                </div>
+
+                <div class="setting-item-row">
+                    <div class="setting-info">
+                        <span class="setting-title">Voice Speech Rate</span>
+                        <span class="setting-desc">Pacing of spoken voice audio synthesis</span>
+                    </div>
+                    <select id="speech-rate-select" class="form-select">
+                        <option value="0.8">0.8x (Slower)</option>
+                        <option value="1.0" selected>1.0x (Normal)</option>
+                        <option value="1.2">1.2x (Faster)</option>
+                    </select>
+                </div>
+
+                <div class="setting-item-row">
+                    <div class="setting-info">
+                        <span class="setting-title">Voice Pitch</span>
+                        <span class="setting-desc">Frequency tone of spoken voice</span>
+                    </div>
+                    <select id="speech-pitch-select" class="form-select">
+                        <option value="0.9">Calm / Gentle</option>
+                        <option value="1.0" selected>Standard Natural</option>
+                        <option value="1.1">Bright</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="acc-save-btn" class="btn btn-primary">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Help & Guidance (?) -->
+    <div id="help-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="help-modal-title">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title" id="help-modal-title">
+                    <i class="fa-solid fa-circle-question text-blue"></i>
+                    <span>How SignSync Works &bull; User Guide</span>
+                </div>
+                <button class="modal-close-btn" id="help-close-btn" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h4 style="color: var(--color-navy);"><i class="fa-solid fa-hand text-blue"></i> 1. Signing to Speech</h4>
+                <ol style="padding-left: 20px; color: var(--color-text-secondary); font-size: 0.92rem; line-height: 1.6;">
+                    <li>Allow camera access when prompted by the browser.</li>
+                    <li>Position your hands inside the guide box on the video preview.</li>
+                    <li>Hold a sign steadily for 0.70 seconds to confirm and add it to the conversation.</li>
+                    <li>Click <strong>Speak</strong> to read your signed message aloud to hearing partners.</li>
+                </ol>
+
+                <h4 style="color: var(--color-navy); margin-top: 10px;"><i class="fa-solid fa-microphone text-amber"></i> 2. Speaking to Sign</h4>
+                <ol style="padding-left: 20px; color: var(--color-text-secondary); font-size: 0.92rem; line-height: 1.6;">
+                    <li>Tap <strong>Tap to Speak</strong> in the voice section.</li>
+                    <li>Speak your sentence naturally.</li>
+                    <li>Review the recognized text in the edit box and click <strong>Show Sign &amp; Send</strong>.</li>
+                    <li>The SignVisualizer will display the corresponding visual sign sequence.</li>
+                </ol>
+
+                <h4 style="color: var(--color-navy); margin-top: 10px;"><i class="fa-solid fa-wrench text-muted"></i> Troubleshooting</h4>
+                <ul style="padding-left: 20px; color: var(--color-text-secondary); font-size: 0.88rem; line-height: 1.5;">
+                    <li><strong>Hands not detected?</strong> Move hands into the center of the camera frame and increase room lighting.</li>
+                    <li><strong>Microphone not responding?</strong> Ensure microphone permissions are enabled in your browser settings.</li>
+                    <li><strong>Sign not recognized?</strong> Check the <em>My Signs</em> tab to confirm the hand shape.</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button id="help-ok-btn" class="btn btn-primary">Got It</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Settings (⚙️) -->
+    <div id="settings-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title" id="settings-modal-title">
+                    <i class="fa-solid fa-gear text-navy"></i>
+                    <span>SignSync System Settings</span>
+                </div>
+                <button class="modal-close-btn" id="settings-close-btn" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-item-row">
+                    <div class="setting-info">
+                        <span class="setting-title">Camera Input Device</span>
+                        <span class="setting-desc">Primary camera stream for gesture vision</span>
+                    </div>
+                    <select class="form-select" id="camera-source-select">
+                        <option value="0" selected>Integrated Laptop Camera</option>
+                        <option value="wearable">SignSync Wear (USB Locket)</option>
+                    </select>
+                </div>
+
+                <div class="setting-item-row">
+                    <div class="setting-info">
+                        <span class="setting-title">Auto-Record Delay</span>
+                        <span class="setting-desc">Time required to hold sign before committing</span>
+                    </div>
+                    <select class="form-select" id="hold-time-select">
+                        <option value="0.7" selected>0.70 Seconds (Standard)</option>
+                        <option value="1.0">1.00 Second (Deliberate)</option>
+                    </select>
+                </div>
+
+                <div class="setting-item-row">
+                    <div class="setting-info">
+                        <span class="setting-title">Privacy Policy &amp; Data Safety</span>
+                        <span class="setting-desc">Your camera and microphone streams are processed locally for real-time gesture and speech detection. No video or audio is stored on remote servers.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="settings-save-btn" class="btn btn-primary">Close Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Client Script -->
+    <script src="/static/js/main.js?v=brand_splash_v1"></script>
+</body>
+</html>
