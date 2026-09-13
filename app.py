@@ -4,6 +4,7 @@ Main Flask Application Server
 High-Precision 95%+ Vision, 3D Kinematics, Sequential Sentence Studio & Analytics
 """
 import time
+import base64
 import cv2
 import numpy as np
 from flask import Flask, render_template, Response, jsonify, request
@@ -164,6 +165,89 @@ def generate_video_stream():
 def video_feed():
     return Response(generate_video_stream(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
+
+# Browser-side camera capture: the frontend grabs frames from the user's own
+# webcam (getUserMedia) and POSTs them here for inference, instead of the
+# server opening its own camera device (which a cloud host doesn't have).
+# Reuses the exact same detection/fusion/sentence pipeline as the MJPEG path.
+last_upload_frame_time = None
+
+@app.route('/api/process_frame', methods=['POST'])
+def process_frame_route():
+    global gesture_recognizer, emotion_detector, fusion_engine, sentence_engine
+    global latest_telemetry, fps_history, last_upload_frame_time
+
+    if not all([gesture_recognizer, emotion_detector, fusion_engine, sentence_engine]):
+        return jsonify({"success": False, "error": "System not initialized"}), 503
+
+    payload = request.get_json(silent=True) or {}
+    image_data = payload.get('image', '')
+    if ',' in image_data:
+        image_data = image_data.split(',', 1)[1]
+
+    try:
+        img_bytes = base64.b64decode(image_data)
+        arr = np.frombuffer(img_bytes, dtype=np.uint8)
+        frame = cv2.imdecode(arr, cv2.IMREAD_COLOR)
+    except Exception:
+        frame = None
+
+    if frame is None:
+        return jsonify({"success": False, "error": "Could not decode frame"}), 400
+
+    # 1. 3D Hand Gesture Processing
+    gesture, g_conf, frame = gesture_recognizer.process_frame(frame)
+
+    # 2. 95%+ FACS Facial Emotion Processing
+    emotion, e_conf, frame = emotion_detector.process_frame(frame)
+
+    # 3. Sequential Sentence Construction
+    new_word, current_sentence = sentence_engine.update(gesture)
+
+    # 4. Multimodal Context Fusion
+    fusion_result = fusion_engine.fuse(gesture, emotion, g_conf, e_conf)
+
+    # 5. Measure effective FPS from actual upload cadence
+    now = time.time()
+    if last_upload_frame_time is not None:
+        fps = 1.0 / max(0.001, now - last_upload_frame_time)
+        fps_history.append(fps)
+        if len(fps_history) > 15:
+            fps_history.pop(0)
+    last_upload_frame_time = now
+    avg_fps = sum(fps_history) / len(fps_history) if fps_history else 0.0
+
+    # 6. Update Shared State (same telemetry contract /api/status already serves)
+    latest_telemetry.update(sanitize_telemetry({
+        "gesture": gesture,
+        "gesture_conf": g_conf,
+        "emotion": emotion,
+        "emotion_conf": e_conf,
+        "phrase": fusion_result.get("phrase"),
+        "sentence": current_sentence,
+        "sentence_words": sentence_engine.get_words() if sentence_engine else [],
+        "suggestions": sentence_engine.get_suggestions() if sentence_engine else [],
+        "biometrics": emotion_detector.get_telemetry_metrics() if emotion_detector else {},
+        "hold_progress": round(sentence_engine.hold_progress, 2) if sentence_engine else 0.0,
+        "recording_enabled": sentence_engine.recording_enabled if sentence_engine else False,
+        "hand_framed": gesture_recognizer.last_hand_framed if gesture_recognizer else "WAITING",
+        "lighting_status": gesture_recognizer.last_lighting_status if gesture_recognizer else "GOOD",
+        "brightness": round(gesture_recognizer.last_brightness, 1) if gesture_recognizer else 100.0,
+        "is_priority": fusion_result.get("is_priority", False),
+        "should_speak": fusion_result.get("should_speak", False),
+        "fps": round(avg_fps, 1),
+        "timestamp": fusion_result.get("timestamp", "")
+    }))
+
+    # 7. Return the annotated frame (same overlay the MJPEG path drew) so the
+    # browser can show it in place of a raw passthrough feed.
+    ret, buffer = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 80])
+    annotated_b64 = base64.b64encode(buffer.tobytes()).decode('ascii') if ret else None
+
+    return jsonify({
+        "success": True,
+        "annotated_image": f"data:image/jpeg;base64,{annotated_b64}" if annotated_b64 else None
+    })
 
 @app.route('/api/status')
 def api_status():
@@ -593,8 +677,12 @@ def api_export_log():
         'Content-Disposition': 'attachment; filename="assistive_session_report.txt"'
     }
 
+# Initialize unconditionally at import time so this also runs under a
+# production WSGI server (e.g. gunicorn app:app), which never executes the
+# __main__ block below.
+init_system()
+
 if __name__ == '__main__':
-    init_system()
     print("\n" + "="*60)
     print(" ULTRA-ACCURACY SIGN & EMOTION RECOGNITION READY")
     print(" Open Browser: http://127.0.0.1:5000")

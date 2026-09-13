@@ -39,7 +39,9 @@ document.addEventListener('DOMContentLoaded', () => {
         isCommunicateActive: false,
         telemetryPollTimer: null,
         activeMediaStream: null,
-        activeAudioStream: null
+        activeAudioStream: null,
+        frameCaptureTimer: null,
+        frameCaptureBusy: false
     };
 
     // ================= DOM ELEMENTS =================
@@ -55,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Camera & Sign Input
     const cameraStreamImg = document.getElementById('camera-stream');
+    const cameraCaptureVideo = document.getElementById('camera-capture-video');
     const smartFrameEl = document.getElementById('smart-frame');
     const smartFrameText = document.getElementById('smart-frame-text');
     const toggleRecordBtn = document.getElementById('toggle-record-btn');
@@ -175,18 +178,84 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
+    // ================= BROWSER-SIDE CAMERA CAPTURE =================
+    // The browser owns the camera (getUserMedia) and periodically ships a
+    // JPEG snapshot to the backend for gesture/emotion inference. The
+    // backend has no camera of its own — this is required for the feature
+    // to work at all once deployed off the developer's own machine.
+    let frameCaptureCanvas = null;
+
+    async function startBrowserCameraCapture() {
+        const standbyEl = document.getElementById('camera-standby-placeholder');
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            showToast('Camera access is not supported in this browser', 'fa-solid fa-triangle-exclamation text-amber');
+            return;
+        }
+
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { width: { ideal: 640 }, height: { ideal: 480 } },
+                audio: false
+            });
+            state.activeMediaStream = stream;
+
+            if (cameraCaptureVideo) {
+                cameraCaptureVideo.srcObject = stream;
+                await cameraCaptureVideo.play().catch(() => {});
+            }
+
+            if (standbyEl) standbyEl.classList.add('hidden');
+            if (cameraStreamImg) cameraStreamImg.style.display = 'block';
+
+            if (state.frameCaptureTimer) clearInterval(state.frameCaptureTimer);
+            state.frameCaptureTimer = setInterval(captureAndSendFrame, 200);
+        } catch (err) {
+            console.error('[CAMERA] getUserMedia failed:', err);
+            showToast('Camera permission denied or unavailable', 'fa-solid fa-video-slash text-rose');
+            if (standbyEl) standbyEl.classList.remove('hidden');
+        }
+    }
+
+    async function captureAndSendFrame() {
+        if (!state.isCommunicateActive || state.frameCaptureBusy) return;
+        if (!cameraCaptureVideo || cameraCaptureVideo.readyState < 2) return; // HAVE_CURRENT_DATA
+        if (!cameraCaptureVideo.videoWidth || !cameraCaptureVideo.videoHeight) return;
+
+        state.frameCaptureBusy = true;
+        try {
+            if (!frameCaptureCanvas) frameCaptureCanvas = document.createElement('canvas');
+            frameCaptureCanvas.width = cameraCaptureVideo.videoWidth;
+            frameCaptureCanvas.height = cameraCaptureVideo.videoHeight;
+            const ctx = frameCaptureCanvas.getContext('2d');
+            ctx.drawImage(cameraCaptureVideo, 0, 0, frameCaptureCanvas.width, frameCaptureCanvas.height);
+            const dataUrl = frameCaptureCanvas.toDataURL('image/jpeg', 0.7);
+
+            const res = await fetch('/api/process_frame', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: dataUrl })
+            });
+            if (!res.ok) return;
+            const data = await res.json();
+            if (data && data.success && data.annotated_image && cameraStreamImg && state.isCommunicateActive) {
+                cameraStreamImg.src = data.annotated_image;
+            }
+        } catch (err) {
+            // Transient network hiccup on one frame — not worth surfacing to the user.
+        } finally {
+            state.frameCaptureBusy = false;
+        }
+    }
+
     // ================= COMMUNICATION RESOURCE LIFECYCLE (PAGE-SCOPED) =================
     function startCommunicationSession() {
         if (state.isCommunicateActive && state.telemetryPollTimer) return;
         state.isCommunicateActive = true;
 
-        // 1. Activate Camera Stream
-        if (cameraStreamImg) {
-            cameraStreamImg.style.display = 'block';
-            cameraStreamImg.src = `/video_feed?t=${Date.now()}`;
-        }
-        const standbyEl = document.getElementById('camera-standby-placeholder');
-        if (standbyEl) standbyEl.classList.add('hidden');
+        // 1. Activate Camera (browser-captured, sent to the backend for
+        // inference — the server has no camera of its own in production).
+        startBrowserCameraCapture();
 
         // 2. Start Telemetry Polling (if not already polling)
         if (state.telemetryPollTimer) {
@@ -235,17 +304,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // 4. Sever Video Stream & Clean MediaStream
+        if (state.frameCaptureTimer) {
+            clearInterval(state.frameCaptureTimer);
+            state.frameCaptureTimer = null;
+        }
         if (cameraStreamImg) {
             cameraStreamImg.src = '';
             cameraStreamImg.removeAttribute('src');
             cameraStreamImg.style.display = 'none';
-            if (cameraStreamImg.srcObject) {
-                try {
-                    const tracks = cameraStreamImg.srcObject.getTracks ? cameraStreamImg.srcObject.getTracks() : [];
-                    tracks.forEach(t => t.stop());
-                } catch (e) {}
-                cameraStreamImg.srcObject = null;
-            }
+        }
+        if (cameraCaptureVideo) {
+            cameraCaptureVideo.srcObject = null;
         }
         const standbyEl = document.getElementById('camera-standby-placeholder');
         if (standbyEl) standbyEl.classList.remove('hidden');
@@ -557,10 +626,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Refresh Camera View (Only active inside Communicate session)
-    if (toggleStreamBtn && cameraStreamImg) {
+    if (toggleStreamBtn) {
         toggleStreamBtn.addEventListener('click', () => {
             if (!state.isCommunicateActive) return;
-            cameraStreamImg.src = `/video_feed?t=${Date.now()}`;
+            startBrowserCameraCapture();
             showToast('Camera feed refreshed', 'fa-solid fa-rotate');
         });
     }
