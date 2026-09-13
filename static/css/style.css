@@ -208,7 +208,7 @@ body.reduced-motion *::after {
 }
 
 .brand-logo-img {
-    height: 52px;
+    height: 62px;
     width: auto;
     object-fit: contain;
     border-radius: var(--radius-sm);
@@ -231,10 +231,10 @@ body.reduced-motion *::after {
 }
 
 .brand-title {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
     font-weight: 800;
     color: var(--color-navy);
-    letter-spacing: -0.03em;
+    letter-spacing: -0.02em;
     background: linear-gradient(135deg, var(--color-navy) 0%, var(--color-blue) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
