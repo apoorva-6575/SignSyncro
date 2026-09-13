@@ -1210,10 +1210,12 @@ body.reduced-motion *::after {
 .comm-workspace {
     max-width: 1480px;
     margin: 0 auto;
-    padding: 20px 24px 40px;
+    padding: 12px 20px 20px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 12px;
+    height: calc(100vh - 88px);
+    overflow: hidden;
 }
 
 /* Top Quick Status Bar */
@@ -1224,10 +1226,11 @@ body.reduced-motion *::after {
     flex-wrap: wrap;
     gap: 12px;
     background: var(--color-surface);
-    padding: 10px 18px;
+    padding: 8px 16px;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-xs);
+    flex-shrink: 0;
 }
 
 .comm-breadcrumbs {
@@ -1282,16 +1285,37 @@ body.reduced-motion *::after {
 /* ---------------- DUAL COLUMN COMMUNICATION LAYOUT ---------------- */
 .comm-layout-grid {
     display: grid;
-    grid-template-columns: 1.15fr 1fr;
-    gap: 24px;
-    align-items: start;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 20px;
+    align-items: stretch;
+    flex: 1;
+    min-height: 0;
+}
+
+/* Desktop grid layout rule */
+@media (min-width: 992px) {
+    .comm-workspace {
+        padding-bottom: 24px;
+    }
+
+    .comm-layout-grid {
+        grid-template-columns: 1.05fr 1fr;
+    }
+
+    .panel-card,
+    .conversation-card {
+        display: flex;
+        flex-direction: column;
+    }
 }
 
 /* ================= LEFT COLUMN: LIVE CAMERA & SIGN INPUT ================= */
 .comm-left-panel {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 14px;
+    height: 100%;
+    min-height: 0;
 }
 
 .panel-card {
@@ -1299,16 +1323,96 @@ body.reduced-motion *::after {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
-    overflow: hidden;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
 }
 
 .panel-card-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 18px;
+    padding: 10px 16px;
     border-bottom: 1px solid var(--color-border);
     background: #fafbfc;
+    flex-shrink: 0;
+}
+
+/* ================= RIGHT COLUMN: LIVE CONVERSATION & SPEECH → SIGN ================= */
+.comm-right-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    height: 100%;
+    min-height: 0;
+}
+
+/* ---------------- 💬 CONVERSATION PANEL ---------------- */
+.conversation-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+}
+
+.conv-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--color-border);
+    background: #fafbfc;
+    flex-shrink: 0;
+}
+
+.conv-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-navy);
+}
+
+.conv-card-title .sym {
+    font-size: 1.1rem;
+    color: var(--color-blue);
+}
+
+.conv-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.conv-feed-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    background: #fdfdfd;
+    scroll-behavior: smooth;
+}
+
+.conv-input-bar {
+    flex-shrink: 0;
+}
+
+.conv-speech-footer {
+    flex-shrink: 0;
+    border-top: 1px solid var(--color-border);
+    background: #fafbfc;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .panel-card-title {
@@ -1336,6 +1440,7 @@ body.reduced-motion *::after {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .camera-stream-img {
@@ -1897,8 +2002,7 @@ body.reduced-motion *::after {
 .avatar-stage-viewport {
     position: relative;
     width: 100%;
-    min-height: 250px;
-    max-height: 340px;
+    min-height: 320px;
     background: #090d16;
     display: flex;
     align-items: center;
@@ -1909,7 +2013,7 @@ body.reduced-motion *::after {
 .avatar-stage-img {
     width: 100%;
     height: 100%;
-    max-height: 340px;
+    min-height: 320px;
     object-fit: contain;
     display: block;
     transition: opacity 0.2s ease, transform 0.25s ease;
@@ -2251,7 +2355,7 @@ body.reduced-motion *::after {
     font-size: 1.05rem;
 }
 
-/* Direct Text Input Bar */
+/* Direct Text Input Bar & Unified Composer */
 .conv-input-bar {
     display: flex;
     align-items: center;
@@ -2259,6 +2363,39 @@ body.reduced-motion *::after {
     padding: 12px 18px;
     border-top: 1px solid var(--color-border);
     background: #ffffff;
+    flex-shrink: 0;
+}
+
+.compact-mic-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: var(--color-blue);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    border-radius: var(--radius-md);
+    white-space: nowrap;
+    transition: var(--transition-fast);
+}
+
+.compact-mic-btn.listening {
+    background: var(--color-danger);
+    animation: micPulse 1.2s infinite alternate;
+}
+
+@keyframes micPulse {
+    from { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    to { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+}
+
+.compact-send-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    white-space: nowrap;
 }
 
 .conv-text-input {
@@ -2427,6 +2564,36 @@ body.reduced-motion *::after {
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
+}
+
+/* Quick Phrases Collapsible */
+.quick-phrases-collapsible {
+    margin-top: 4px;
+}
+
+.quick-phrases-summary {
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 6px;
+    user-select: none;
+}
+
+.quick-phrases-summary:hover {
+    color: var(--color-blue);
+}
+
+.quick-phrases-collapsible[open] .summary-chevron {
+    transform: rotate(180deg);
+}
+
+.summary-chevron {
+    transition: transform 0.2s ease;
+    font-size: 0.75rem;
 }
 
 /* Speech Error Fallback Banner */

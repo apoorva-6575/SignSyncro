@@ -467,7 +467,6 @@
                                 </button>
                                 <button class="quick-need-btn" data-word="STOP" data-phrase="Please stop now.">
                                     <i class="fa-solid fa-hand"></i> Stop
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -475,12 +474,12 @@
 
                 <!-- ================= RIGHT COLUMN: LIVE CONVERSATION & SPEECH → SIGN ================= -->
                 <div class="comm-right-panel">
-                    <!-- 1. 💬 CONVERSATION PANEL -->
+                    <!-- 1. 💬 CONVERSATION PANEL WITH INTEGRATED SPEECH & SIGN VISUALIZER -->
                     <div class="conversation-card">
                         <div class="conv-card-header">
                             <div class="conv-card-title">
                                 <span class="sym"><i class="fa-solid fa-comments"></i></span>
-                                <span>LIVE CONVERSATION</span>
+                                <span>LIVE CONVERSATION &bull; SPEECH &rarr; SIGN</span>
                             </div>
                             <div class="conv-toolbar-actions">
                                 <button id="speak-sentence-btn" class="btn btn-xs btn-outline" title="Read latest message aloud">
@@ -498,7 +497,7 @@
                             </div>
                         </div>
 
-                        <!-- Conversation Feed -->
+                        <!-- Conversation Feed (Internally Scrollable Area) -->
                         <div id="conversation-feed" class="conv-feed-body">
                             <!-- Populated dynamically or empty state -->
                             <div class="conv-empty-state" id="conv-empty-state">
@@ -508,35 +507,15 @@
                             </div>
                         </div>
 
-                        <!-- Direct Text Input Bar -->
-                        <div class="conv-input-bar">
+                        <!-- Integrated Message Composer Bar (Text Input + Tap to Speak + Send) -->
+                        <div class="conv-input-bar unified-composer">
                             <input type="text" id="direct-chat-input" class="conv-text-input" placeholder="Type a message or response directly here...">
-                            <button id="direct-send-btn" class="btn btn-sm btn-primary">
-                                <i class="fa-solid fa-paper-plane"></i> Send
+                            <button id="speech-to-sign-btn" class="btn btn-primary compact-mic-btn ripple-host" title="Start Speaking">
+                                <i id="mic-icon" class="fa-solid fa-microphone"></i>
+                                <span id="mic-text">Tap to Speak</span>
                             </button>
-                        </div>
-                    </div>
-
-                    <!-- 2. 🎙️ VOICE → SIGN SECTION -->
-                    <div class="speech-sign-card">
-                        <div class="speech-card-header">
-                            <div class="speech-card-title">
-                                <span class="sym"><i class="fa-solid fa-microphone"></i></span>
-                                <span>VOICE &rarr; SIGN &bull; SPEECH INPUT</span>
-                            </div>
-                            <span class="badge-tag">Speech to Visual Sign</span>
-                        </div>
-
-                        <!-- Hero Microphone Button (Speak -> Automatic Chat & Inline Sign) -->
-                        <div class="hero-mic-deck">
-                            <button id="speech-to-sign-btn" class="hero-mic-btn" title="Start Speaking">
-                                <div class="mic-circle-icon">
-                                    <i id="mic-icon" class="fa-solid fa-microphone"></i>
-                                </div>
-                                <div class="mic-labels">
-                                    <span class="mic-primary-label" id="mic-text">Tap to Speak</span>
-                                    <span class="mic-sub-label" id="mic-sub-text">Speak naturally &bull; Message and sign appear automatically in conversation</span>
-                                </div>
+                            <button id="direct-send-btn" class="btn btn-primary compact-send-btn ripple-host">
+                                <i class="fa-solid fa-paper-plane"></i> Send
                             </button>
                         </div>
 
@@ -552,9 +531,12 @@
                             </div>
                         </div>
 
-                        <!-- Quick Voice Phrases (Click to immediately add Voice Message with Sign) -->
-                        <div class="quick-phrases-block">
-                            <span class="quick-phrases-label"><i class="fa-solid fa-bolt text-amber"></i> Quick Voice Phrases (One-Tap):</span>
+                        <!-- Quick Voice Phrases (Compact Collapsible) -->
+                        <details class="quick-phrases-collapsible">
+                            <summary class="quick-phrases-summary">
+                                <span><i class="fa-solid fa-bolt text-amber"></i> Quick Voice Phrases</span>
+                                <i class="fa-solid fa-chevron-down summary-chevron"></i>
+                            </summary>
                             <div class="quick-phrases-grid">
                                 <button class="quick-phrase-btn" data-phrase="Yes, sure.">&ldquo;Yes, sure.&rdquo;</button>
                                 <button class="quick-phrase-btn" data-phrase="What would you like to eat?">&ldquo;What would you like to eat?&rdquo;</button>
@@ -563,7 +545,7 @@
                                 <button class="quick-phrase-btn" data-phrase="Where does it hurt?">&ldquo;Where does it hurt?&rdquo;</button>
                                 <button class="quick-phrase-btn" data-phrase="Okay, sure.">&ldquo;Okay, sure.&rdquo;</button>
                             </div>
-                        </div>
+                        </details>
                     </div>
                 </div>
             </div>
