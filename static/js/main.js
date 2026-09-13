@@ -1,5 +1,5 @@
 /**
- * SignSync - "Communication without barriers."
+ * SignSyncro - "Connecting Beyond Words."
  * Production Master Client Application
  * 
  * Manages:
@@ -379,7 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btn) {
             btn.addEventListener('click', () => {
                 switchView('view-communicate');
-                showToast('Welcome to SignSync Workspace!', 'fa-solid fa-hands-asl-interpreting');
+                showToast('Welcome to SignSyncro Workspace!', 'fa-solid fa-hands-asl-interpreting');
             });
         }
     });
@@ -791,197 +791,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         conversationFeed.innerHTML = '';
-        state.conversation.forEach(msg => {
-            const bubble = document.createElement('div');
-            bubble.className = `conv-msg-bubble msg-${msg.source}`;
-            bubble.id = `bubble-${msg.id}`;
 
-            if (msg.source === 'sign') {
-                const emotionBadge = (msg.emotion && msg.emotion !== 'neutral')
-                    ? `<span style="font-size: 0.72rem; color: var(--color-blue); font-weight: 600;">(${escapeHtml(msg.emotion)})</span>`
-                    : '';
+        // Only the newest message gets the full signing stage — it must always
+        // be fully visible without scrolling. Older messages render compactly
+        // inside their own scrollable history strip so they can never push the
+        // current sign/avatar off-screen.
+        const historyMsgs = state.conversation.slice(0, -1);
+        const latestMsg = state.conversation[state.conversation.length - 1];
 
-                bubble.innerHTML = `
-                    <div class="msg-header-row">
-                        <span class="msg-source-tag">
-                            <i class="fa-solid fa-hand"></i> Sign Input ${emotionBadge}
-                        </span>
-                        <span class="msg-timestamp">${msg.timestamp}</span>
-                    </div>
-                    <div class="msg-content-text">${escapeHtml(msg.text)}</div>
-                    <div class="msg-actions-row">
-                        <button class="btn btn-xs btn-outline btn-read-msg" data-text="${escapeHtml(msg.text)}" title="Read message aloud">
-                            <i class="fa-solid fa-volume-high"></i> Read
-                        </button>
-                    </div>
-                `;
-            } else if (msg.source === 'voice') {
-                // PRIMARY VISUAL PERFORMANCE: Photorealistic ISL Signing Presenter (Asha)
-                let signInnerHtml = '';
-                if (msg.signStatus === 'loading') {
-                    signInnerHtml = `
-                        <div class="inline-sign-loading">
-                            <i class="fa-solid fa-spinner fa-spin text-blue"></i>
-                            <span>Preparing Indian Sign Language performance...</span>
-                        </div>
-                    `;
-                } else if (msg.signStatus === 'ready' && msg.signData && msg.signData.length > 0) {
-                    const curIdx = msg.signCurrentIndex || 0;
-                    const curSign = msg.signData[curIdx] || msg.signData[0];
-                    const avatarSrc = curSign.avatar_img || `/static/img/avatar_isl/${curSign.word.toLowerCase().replace(' ', '_')}.jpg`;
-                    const isPlaying = !!msg.isPlaying;
-                    const currentSpeed = msg.signSpeed || 1.0;
+        if (historyMsgs.length > 0) {
+            const historyWrap = document.createElement('div');
+            historyWrap.className = 'conv-history-scroll';
+            historyWrap.id = 'conv-history-scroll';
+            historyMsgs.forEach(msg => historyWrap.appendChild(buildConvBubble(msg, true)));
+            conversationFeed.appendChild(historyWrap);
+        }
 
-                    signInnerHtml = `
-                        <div class="avatar-stage-card">
-                            <div class="avatar-stage-header">
-                                <span class="isl-tag">
-                                    <i class="fa-solid fa-hands-asl-interpreting"></i> Indian Sign Language (ISL)
-                                </span>
-                                <span class="presenter-tag">
-                                    <i class="fa-solid fa-user-check text-emerald"></i> Presenter: Asha
-                                </span>
-                            </div>
+        const pinnedWrap = document.createElement('div');
+        pinnedWrap.className = 'conv-current-pinned ' + (latestMsg.source === 'voice' ? 'pinned-fill' : 'pinned-compact');
+        pinnedWrap.id = 'conv-current-pinned';
+        pinnedWrap.appendChild(buildConvBubble(latestMsg, false));
+        conversationFeed.appendChild(pinnedWrap);
 
-                            <div class="avatar-stage-viewport">
-                                <img src="${avatarSrc}" class="avatar-stage-img anim-pulse" alt="ISL Sign for ${escapeHtml(curSign.word)}" onerror="this.src='/static/img/avatar_isl/idle.jpg'">
-                                <div class="avatar-current-overlay">
-                                    <span class="avatar-current-word">${escapeHtml(curSign.word)}</span>
-                                    <span class="avatar-current-category">${escapeHtml(curSign.category || 'ISL')}</span>
-                                </div>
-                                ${msg.signData.length > 1 ? `<span class="avatar-counter-badge">Sign ${curIdx + 1} of ${msg.signData.length}</span>` : ''}
-                            </div>
-
-                            <!-- Stepper Chips Progression -->
-                            ${msg.signData.length > 1 ? `
-                                <div class="avatar-stepper-wrap" style="padding: 10px 14px 4px;">
-                                    <div class="avatar-stepper">
-                                        ${msg.signData.map((s, idx) => `
-                                            <button class="avatar-step-chip ${idx === curIdx ? 'active' : ''}" data-msg-id="${msg.id}" data-step-idx="${idx}">
-                                                ${idx === curIdx ? '<span class="chip-dot"></span>' : ''}
-                                                <span>${idx + 1}.</span> <strong>${escapeHtml(s.word)}</strong>
-                                            </button>
-                                            ${idx < msg.signData.length - 1 ? '<i class="fa-solid fa-arrow-right inline-step-arrow"></i>' : ''}
-                                        `).join('')}
-                                    </div>
-                                </div>
-                            ` : ''}
-
-                            <!-- Playback Controls & Speed Bar -->
-                            <div class="avatar-playback-bar" style="margin: 8px 12px 10px;">
-                                <div class="avatar-playback-actions">
-                                    ${msg.signData.length > 1 ? `
-                                        <button class="avatar-ctrl-btn btn-prev-sign" data-msg-id="${msg.id}" title="Previous sign" ${curIdx === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
-                                            <i class="fa-solid fa-backward-step"></i> Prev
-                                        </button>
-                                    ` : ''}
-
-                                    <button class="avatar-ctrl-btn btn-play-toggle ${isPlaying ? '' : 'btn-primary'}" data-msg-id="${msg.id}" title="${isPlaying ? 'Pause' : 'Play'}">
-                                        <i class="fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'}"></i> ${isPlaying ? 'Pause' : 'Play'}
-                                    </button>
-
-                                    <button class="avatar-ctrl-btn btn-replay-avatar" data-msg-id="${msg.id}" title="Replay from start">
-                                        <i class="fa-solid fa-rotate-right"></i> Replay
-                                    </button>
-
-                                    ${msg.signData.length > 1 ? `
-                                        <button class="avatar-ctrl-btn btn-next-sign" data-msg-id="${msg.id}" title="Next sign" ${curIdx >= msg.signData.length - 1 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
-                                            Next <i class="fa-solid fa-forward-step"></i>
-                                        </button>
-                                    ` : ''}
-                                </div>
-
-                                <!-- Speed Selector -->
-                                <div class="speed-control-group">
-                                    <span>Speed:</span>
-                                    <button class="speed-chip ${currentSpeed === 0.75 ? 'active' : ''}" data-msg-id="${msg.id}" data-speed="0.75">0.75x</button>
-                                    <button class="speed-chip ${currentSpeed === 1.0 ? 'active' : ''}" data-msg-id="${msg.id}" data-speed="1.0">1x</button>
-                                    <button class="speed-chip ${currentSpeed === 1.25 ? 'active' : ''}" data-msg-id="${msg.id}" data-speed="1.25">1.25x</button>
-                                </div>
-                            </div>
-
-                            <!-- Collapsible Technical Details (Subordinate to Visual) -->
-                            <div class="avatar-details-drawer" style="margin: 0 12px 10px;">
-                                <button class="avatar-details-toggle" data-msg-id="${msg.id}">
-                                    <span><i class="fa-solid fa-circle-info text-blue"></i> Technical Sign Details</span>
-                                    <i class="fa-solid fa-chevron-${msg.detailsOpen ? 'up' : 'down'}"></i>
-                                </button>
-                                <div class="avatar-details-body ${msg.detailsOpen ? '' : 'hidden'}" id="details-body-${msg.id}">
-                                    <div><strong>Hand Shape:</strong> ${escapeHtml(curSign.hand_shape || 'Standard ISL configuration')}</div>
-                                    <div><strong>Movement:</strong> ${escapeHtml(curSign.movement || 'Stationary or deliberate motion')}</div>
-                                    ${curSign.description ? `<div><strong>Description:</strong> ${escapeHtml(curSign.description)}</div>` : ''}
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Bottom Row: Spoken words + Edit + Read -->
-                        <div class="inline-sign-bottom-bar">
-                            <span class="inline-sign-phrase-label">&ldquo;${escapeHtml(msg.text)}&rdquo;</span>
-                            <div class="inline-sign-actions">
-                                <button class="btn btn-xs btn-outline btn-edit-msg" data-msg-id="${msg.id}" title="Edit spoken words">
-                                    <i class="fa-solid fa-pen-to-square"></i> Edit
-                                </button>
-                                <button class="btn btn-xs btn-outline btn-read-msg" data-text="${escapeHtml(msg.text)}" title="Read message aloud">
-                                    <i class="fa-solid fa-volume-high"></i> Read
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    // Unavailable fallback
-                    signInnerHtml = `
-                        <div class="inline-sign-unavailable">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <i class="fa-solid fa-circle-info text-amber"></i>
-                                <span>Sign visualization isn't available for this phrase yet.</span>
-                            </div>
-                            <div class="inline-sign-actions">
-                                <button class="btn btn-xs btn-outline btn-edit-msg" data-msg-id="${msg.id}">
-                                    <i class="fa-solid fa-pen-to-square"></i> Edit / Type
-                                </button>
-                                <button class="btn btn-xs btn-outline btn-read-msg" data-text="${escapeHtml(msg.text)}">
-                                    <i class="fa-solid fa-volume-high"></i> Read
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                bubble.innerHTML = `
-                    <div class="msg-header-row">
-                        <span class="msg-source-tag">
-                            <i class="fa-solid fa-microphone text-amber"></i> Voice Input
-                        </span>
-                        <span class="msg-timestamp">${msg.timestamp}</span>
-                    </div>
-                    <div class="msg-content-text" id="text-wrap-${msg.id}">${escapeHtml(msg.text)}</div>
-                    <div class="inline-sign-container">
-                        ${signInnerHtml}
-                    </div>
-                `;
-            } else {
-                // Text input
-                bubble.innerHTML = `
-                    <div class="msg-header-row">
-                        <span class="msg-source-tag">
-                            <i class="fa-solid fa-keyboard"></i> Text Input
-                        </span>
-                        <span class="msg-timestamp">${msg.timestamp}</span>
-                    </div>
-                    <div class="msg-content-text">${escapeHtml(msg.text)}</div>
-                    <div class="msg-actions-row">
-                        <button class="btn btn-xs btn-outline btn-read-msg" data-text="${escapeHtml(msg.text)}" title="Read message aloud">
-                            <i class="fa-solid fa-volume-high"></i> Read
-                        </button>
-                    </div>
-                `;
-            }
-
-            conversationFeed.appendChild(bubble);
-        });
-
-        // Auto-scroll so newest message and its sign are immediately in view
-        conversationFeed.scrollTop = conversationFeed.scrollHeight;
+        // Keep the history strip scrolled to its newest entry; the pinned
+        // current message never scrolls, so it needs no such handling.
+        const historyScrollEl = document.getElementById('conv-history-scroll');
+        if (historyScrollEl) historyScrollEl.scrollTop = historyScrollEl.scrollHeight;
 
         // Bind Read buttons
         conversationFeed.querySelectorAll('.btn-read-msg').forEach(btn => {
@@ -1161,6 +996,226 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         });
+    }
+
+    function buildConvBubble(msg, compact) {
+        const bubble = document.createElement('div');
+        bubble.className = `conv-msg-bubble msg-${msg.source}` + (compact ? ' msg-compact' : ' msg-current');
+        bubble.id = `bubble-${msg.id}`;
+
+        if (msg.source === 'sign') {
+            const emotionBadge = (msg.emotion && msg.emotion !== 'neutral')
+                ? `<span style="font-size: 0.72rem; color: var(--color-blue); font-weight: 600;">(${escapeHtml(msg.emotion)})</span>`
+                : '';
+
+            bubble.innerHTML = `
+                <div class="msg-header-row">
+                    <span class="msg-source-tag">
+                        <i class="fa-solid fa-hand"></i> Sign Input ${emotionBadge}
+                    </span>
+                    <span class="msg-timestamp">${msg.timestamp}</span>
+                </div>
+                <div class="msg-content-text">${escapeHtml(msg.text)}</div>
+                <div class="msg-actions-row">
+                    <button class="btn btn-xs btn-outline btn-read-msg" data-text="${escapeHtml(msg.text)}" title="Read message aloud">
+                        <i class="fa-solid fa-volume-high"></i> Read
+                    </button>
+                </div>
+            `;
+            return bubble;
+        }
+
+        if (msg.source === 'voice' && compact) {
+            let signHint = '';
+            if (msg.signStatus === 'ready' && msg.signData && msg.signData.length > 0) {
+                const words = msg.signData.map(s => s.word).join(' → ');
+                signHint = `<div class="compact-sign-hint"><i class="fa-solid fa-hands"></i> Signed: ${escapeHtml(words)}</div>`;
+            } else if (msg.signStatus === 'loading') {
+                signHint = `<div class="compact-sign-hint"><i class="fa-solid fa-spinner fa-spin"></i> Preparing sign…</div>`;
+            }
+
+            bubble.innerHTML = `
+                <div class="msg-header-row">
+                    <span class="msg-source-tag">
+                        <i class="fa-solid fa-microphone text-amber"></i> Voice Input
+                    </span>
+                    <span class="msg-timestamp">${msg.timestamp}</span>
+                </div>
+                <div class="msg-content-text">${escapeHtml(msg.text)}</div>
+                ${signHint}
+                <div class="msg-actions-row">
+                    <button class="btn btn-xs btn-outline btn-read-msg" data-text="${escapeHtml(msg.text)}" title="Read message aloud">
+                        <i class="fa-solid fa-volume-high"></i> Read
+                    </button>
+                </div>
+            `;
+            return bubble;
+        }
+
+        if (msg.source === 'voice') {
+                // PRIMARY VISUAL PERFORMANCE: Photorealistic ISL Signing Presenter (Asha)
+                let signInnerHtml = '';
+                if (msg.signStatus === 'loading') {
+                    signInnerHtml = `
+                        <div class="inline-sign-loading">
+                            <i class="fa-solid fa-spinner fa-spin text-blue"></i>
+                            <span>Preparing Indian Sign Language performance...</span>
+                        </div>
+                    `;
+                } else if (msg.signStatus === 'ready' && msg.signData && msg.signData.length > 0) {
+                    const curIdx = msg.signCurrentIndex || 0;
+                    const curSign = msg.signData[curIdx] || msg.signData[0];
+                    const avatarSrc = curSign.avatar_img || `/static/img/avatar_isl/${curSign.word.toLowerCase().replace(' ', '_')}.jpg`;
+                    const isPlaying = !!msg.isPlaying;
+                    const currentSpeed = msg.signSpeed || 1.0;
+
+                    signInnerHtml = `
+                        <div class="avatar-stage-card">
+                            <div class="avatar-stage-header">
+                                <span class="isl-tag">
+                                    <i class="fa-solid fa-hands-asl-interpreting"></i> Indian Sign Language (ISL)
+                                </span>
+                                <span class="presenter-tag">
+                                    <i class="fa-solid fa-user-check text-emerald"></i> Presenter: Asha
+                                </span>
+                            </div>
+
+                            <div class="avatar-stage-viewport">
+                                <img src="${avatarSrc}" class="avatar-stage-img anim-pulse" alt="ISL Sign for ${escapeHtml(curSign.word)}" onerror="this.src='/static/img/avatar_isl/idle.jpg'">
+                                <div class="avatar-current-overlay">
+                                    <span class="avatar-current-word">${escapeHtml(curSign.word)}</span>
+                                    <span class="avatar-current-category">${escapeHtml(curSign.category || 'ISL')}</span>
+                                </div>
+                                ${msg.signData.length > 1 ? `<span class="avatar-counter-badge">Sign ${curIdx + 1} of ${msg.signData.length}</span>` : ''}
+                            </div>
+
+                            <!-- Stepper Chips Progression -->
+                            ${msg.signData.length > 1 ? `
+                                <div class="avatar-stepper-wrap" style="padding: 10px 14px 4px;">
+                                    <div class="avatar-stepper">
+                                        ${msg.signData.map((s, idx) => `
+                                            <button class="avatar-step-chip ${idx === curIdx ? 'active' : ''}" data-msg-id="${msg.id}" data-step-idx="${idx}">
+                                                ${idx === curIdx ? '<span class="chip-dot"></span>' : ''}
+                                                <span>${idx + 1}.</span> <strong>${escapeHtml(s.word)}</strong>
+                                            </button>
+                                            ${idx < msg.signData.length - 1 ? '<i class="fa-solid fa-arrow-right inline-step-arrow"></i>' : ''}
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            <!-- Playback Controls & Speed Bar -->
+                            <div class="avatar-playback-bar" style="margin: 8px 12px 10px;">
+                                <div class="avatar-playback-actions">
+                                    ${msg.signData.length > 1 ? `
+                                        <button class="avatar-ctrl-btn btn-prev-sign" data-msg-id="${msg.id}" title="Previous sign" ${curIdx === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                                            <i class="fa-solid fa-backward-step"></i> Prev
+                                        </button>
+                                    ` : ''}
+
+                                    <button class="avatar-ctrl-btn btn-play-toggle ${isPlaying ? '' : 'btn-primary'}" data-msg-id="${msg.id}" title="${isPlaying ? 'Pause' : 'Play'}">
+                                        <i class="fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'}"></i> ${isPlaying ? 'Pause' : 'Play'}
+                                    </button>
+
+                                    <button class="avatar-ctrl-btn btn-replay-avatar" data-msg-id="${msg.id}" title="Replay from start">
+                                        <i class="fa-solid fa-rotate-right"></i> Replay
+                                    </button>
+
+                                    ${msg.signData.length > 1 ? `
+                                        <button class="avatar-ctrl-btn btn-next-sign" data-msg-id="${msg.id}" title="Next sign" ${curIdx >= msg.signData.length - 1 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                                            Next <i class="fa-solid fa-forward-step"></i>
+                                        </button>
+                                    ` : ''}
+                                </div>
+
+                                <!-- Speed Selector -->
+                                <div class="speed-control-group">
+                                    <span>Speed:</span>
+                                    <button class="speed-chip ${currentSpeed === 0.75 ? 'active' : ''}" data-msg-id="${msg.id}" data-speed="0.75">0.75x</button>
+                                    <button class="speed-chip ${currentSpeed === 1.0 ? 'active' : ''}" data-msg-id="${msg.id}" data-speed="1.0">1x</button>
+                                    <button class="speed-chip ${currentSpeed === 1.25 ? 'active' : ''}" data-msg-id="${msg.id}" data-speed="1.25">1.25x</button>
+                                </div>
+                            </div>
+
+                            <!-- Collapsible Technical Details (Subordinate to Visual) -->
+                            <div class="avatar-details-drawer" style="margin: 0 12px 10px;">
+                                <button class="avatar-details-toggle" data-msg-id="${msg.id}">
+                                    <span><i class="fa-solid fa-circle-info text-blue"></i> Technical Sign Details</span>
+                                    <i class="fa-solid fa-chevron-${msg.detailsOpen ? 'up' : 'down'}"></i>
+                                </button>
+                                <div class="avatar-details-body ${msg.detailsOpen ? '' : 'hidden'}" id="details-body-${msg.id}">
+                                    <div><strong>Hand Shape:</strong> ${escapeHtml(curSign.hand_shape || 'Standard ISL configuration')}</div>
+                                    <div><strong>Movement:</strong> ${escapeHtml(curSign.movement || 'Stationary or deliberate motion')}</div>
+                                    ${curSign.description ? `<div><strong>Description:</strong> ${escapeHtml(curSign.description)}</div>` : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Row: Spoken words + Edit + Read -->
+                        <div class="inline-sign-bottom-bar">
+                            <span class="inline-sign-phrase-label">&ldquo;${escapeHtml(msg.text)}&rdquo;</span>
+                            <div class="inline-sign-actions">
+                                <button class="btn btn-xs btn-outline btn-edit-msg" data-msg-id="${msg.id}" title="Edit spoken words">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </button>
+                                <button class="btn btn-xs btn-outline btn-read-msg" data-text="${escapeHtml(msg.text)}" title="Read message aloud">
+                                    <i class="fa-solid fa-volume-high"></i> Read
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Unavailable fallback
+                    signInnerHtml = `
+                        <div class="inline-sign-unavailable">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-circle-info text-amber"></i>
+                                <span>Sign visualization isn't available for this phrase yet.</span>
+                            </div>
+                            <div class="inline-sign-actions">
+                                <button class="btn btn-xs btn-outline btn-edit-msg" data-msg-id="${msg.id}">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit / Type
+                                </button>
+                                <button class="btn btn-xs btn-outline btn-read-msg" data-text="${escapeHtml(msg.text)}">
+                                    <i class="fa-solid fa-volume-high"></i> Read
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                bubble.innerHTML = `
+                    <div class="msg-header-row">
+                        <span class="msg-source-tag">
+                            <i class="fa-solid fa-microphone text-amber"></i> Voice Input
+                        </span>
+                        <span class="msg-timestamp">${msg.timestamp}</span>
+                    </div>
+                    <div class="msg-content-text" id="text-wrap-${msg.id}">${escapeHtml(msg.text)}</div>
+                    <div class="inline-sign-container">
+                        ${signInnerHtml}
+                    </div>
+                `;
+            return bubble;
+        }
+
+        // Text input
+        bubble.innerHTML = `
+            <div class="msg-header-row">
+                <span class="msg-source-tag">
+                    <i class="fa-solid fa-keyboard"></i> Text Input
+                </span>
+                <span class="msg-timestamp">${msg.timestamp}</span>
+            </div>
+            <div class="msg-content-text">${escapeHtml(msg.text)}</div>
+            ${compact ? '' : `
+            <div class="msg-actions-row">
+                <button class="btn btn-xs btn-outline btn-read-msg" data-text="${escapeHtml(msg.text)}" title="Read message aloud">
+                    <i class="fa-solid fa-volume-high"></i> Read
+                </button>
+            </div>`}
+        `;
+        return bubble;
     }
 
     function escapeHtml(string) {
@@ -1878,25 +1933,52 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // ── Full cinematic sequence ──────────────────────────
-    // Phase 1 (0–550ms): splashLogoIn CSS animation runs automatically
-    // Phase 2 (550ms–1350ms): hold — logo visible, tagline fades in
-    // Phase 3 (1350ms–2500ms): zoom-out animation + overlay fade starts
-    // Phase 4 (2000ms+): overlay gone, site interactive
+    // ── Full cinematic sequence (~3.8s total) ───────────────────────
+    // Phase 1 (0–400ms):    splashLogoIn CSS animation — calm settle-in
+    // Phase 2 (400–1500ms): slow zoom IN  (scale 1.00 → 1.22)
+    // Phase 3 (1500–2100ms): hold at hero size, fully readable
+    // Phase 4 (2100–3400ms): slow zoom OUT, shrinking + moving toward the
+    //                        real navbar logo's on-screen position
+    // Phase 5 (3400ms+):    overlay fades, revealing the navbar already
+    //                        sitting exactly where the logo just landed
+    const EASE = 'cubic-bezier(0.65, 0, 0.35, 1)'; // smooth in/out, no overshoot
+    const navLogo = document.getElementById('navbar-logo-img');
 
-    const HOLD_MS    = 800;   // how long logo stays large
-    const ZOOM_DELAY = 550 + HOLD_MS;  // when zoom-out begins (after scale-in + hold)
+    splashInner.style.transformOrigin = 'center center';
 
-    setTimeout(() => {
-        // Trigger the zoom-backward CSS animation
-        splashInner.classList.add('splash-zoom-out');
+    const zoomIn = splashInner.animate(
+        [{ transform: 'scale(1)' }, { transform: 'scale(1.22)' }],
+        { duration: 1100, delay: 400, easing: EASE, fill: 'forwards' }
+    );
 
-        // Begin fading the overlay slightly after zoom starts
-        setTimeout(() => {
-            hideSplash();
-        }, 550); // mid-way through zoom, overlay fades out
+    zoomIn.onfinish = () => {
+        setTimeout(runZoomOutToNavbar, 600); // Phase 3: hold
+    };
 
-    }, ZOOM_DELAY);
+    function runZoomOutToNavbar() {
+        // Measure the real navbar logo's position now, so the shrink target
+        // is exact rather than a guessed fixed offset.
+        let dx = 0, dy = 0, endScale = 0.2;
+        if (navLogo) {
+            const from = splashInner.getBoundingClientRect();
+            const to = navLogo.getBoundingClientRect();
+            dx = (to.left + to.width / 2) - (from.left + from.width / 2);
+            dy = (to.top + to.height / 2) - (from.top + from.height / 2);
+            endScale = Math.max(0.14, Math.min(0.4, to.height / from.height));
+        }
+
+        const zoomOut = splashInner.animate(
+            [
+                { transform: 'translate(0px, 0px) scale(1.22)', opacity: 1 },
+                { transform: `translate(${dx}px, ${dy}px) scale(${endScale})`, opacity: 0.2, offset: 0.88 },
+                { transform: `translate(${dx}px, ${dy}px) scale(${endScale})`, opacity: 0 }
+            ],
+            { duration: 1300, easing: EASE, fill: 'forwards' }
+        );
+
+        // Phase 5: reveal the app right as the logo settles into the navbar
+        zoomOut.onfinish = hideSplash;
+    }
 })();
 
 /* ==========================================================

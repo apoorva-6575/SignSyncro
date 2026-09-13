@@ -1,10 +1,10 @@
 <div align="center">
 
-<img src="static/img/signsync_logo.png" alt="SignSync Logo" width="220"/>
+<img src="static/img/signsyncro_logo.png" alt="SignSyncro Logo" width="220"/>
 
-# SignSync
+# SignSyncro
 
-### Communication without barriers.
+### Connecting Beyond Words.
 
 AI-powered two-way assistive communication through **Sign • Text • Speech**
 
@@ -12,9 +12,9 @@ AI-powered two-way assistive communication through **Sign • Text • Speech**
 
 </div>
 
-## About SignSync
+## About SignSyncro
 
-**SignSync** is an intelligent assistive communication system designed to bridge communication barriers between sign-language users and non-sign-language users. Built around a seamless two-way interaction paradigm, SignSync enables real-time fluid conversation across multiple modalities: **Sign, Text, and Speech**.
+**SignSyncro** is an intelligent assistive communication system designed to bridge communication barriers between sign-language users and non-sign-language users. Built around a seamless two-way interaction paradigm, SignSyncro enables real-time fluid conversation across multiple modalities: **Sign, Text, and Speech**.
 
 ### Core Communication Directions
 
@@ -129,7 +129,7 @@ SignSync/
 │   ├── js/
 │   │   └── main.js            # Frontend logic, routing & speech integration
 │   └── img/
-│       ├── signsync_logo.png  # Official SignSync logo asset
+│       ├── signsyncro_logo.png  # Official SignSyncro logo asset
 │       ├── favicon.png        # Web favicon asset
 │       └── avatar_isl/        # ISL sign language visual card assets
 │
@@ -182,7 +182,7 @@ SignSync/
    ```
    *Alternatively, on Windows double-click `run.bat` or run `python main.py`.*
 
-6. **Access SignSync**
+6. **Access SignSyncro**
    Open your browser and navigate to: `http://127.0.0.1:5000`
 
 ---
@@ -226,7 +226,7 @@ SignSync/
 - **Dynamic Gesture Recognition**: Support for continuous video gesture streams beyond static signs.
 - **Expanded ISL Dictionary**: Increasing vocabulary coverage from foundational phrases to full dictionary support.
 - **Mobile & Edge Deployment**: Android/iOS applications and lightweight edge camera device support.
-- **Wearable Integration**: SignSync Wear compatibility with smart glasses and wearable cameras.
+- **Wearable Integration**: SignSyncro Wear compatibility with smart glasses and wearable cameras.
 
 ---
 

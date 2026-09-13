@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SignSync - "Communication without barriers."
+   SignSyncro - "Connecting Beyond Words."
    Design System & Master Stylesheet
    Brand Palette:
      Navy: #172554 | Blue: #2563EB | Yellow: #FACC15 | Bg: #F8FAFC | Text: #0F172A
@@ -193,18 +193,20 @@ body.reduced-motion *::after {
 .header-inner {
     max-width: 1440px;
     margin: 0 auto;
-    padding: 12px 24px;
+    padding: 10px 16px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 20px;
+    justify-content: flex-start;
+    gap: 8px;
 }
 
 .header-brand {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 10px;
     text-decoration: none;
+    flex-shrink: 0;
+    margin-right: 4px;
 }
 
 .brand-logo-img {
@@ -240,6 +242,7 @@ body.reduced-motion *::after {
     -webkit-text-fill-color: transparent;
     background-clip: text;
     line-height: 1.1;
+    white-space: nowrap;
 }
 
 .brand-tagline {
@@ -248,6 +251,7 @@ body.reduced-motion *::after {
     color: var(--color-text-muted);
     letter-spacing: 0.01em;
     margin-top: 1px;
+    white-space: nowrap;
 }
 
 /* ================================================================
@@ -262,8 +266,8 @@ body.reduced-motion *::after {
     justify-content: center;
     background: #F8FAFC;
     pointer-events: all;
-    /* Fade out at phase 4 */
-    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Final reveal of the app underneath, right after the logo settles into the navbar */
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 #signsync-splash.splash-hidden {
@@ -275,25 +279,24 @@ body.reduced-motion *::after {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 18px;
-    /* This element animates: scale-in then scale-out */
-    animation: splashLogoIn 0.55s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
+    gap: 22px;
+    /* Entrance only — the zoom-in/hold/zoom-out-into-navbar sequence is
+       driven by JS (Web Animations API) since it targets the real navbar
+       logo's on-screen position at runtime. */
+    animation: splashLogoIn 0.4s ease-out forwards;
     transform-origin: center center;
-}
-
-.splash-center.splash-zoom-out {
-    animation: splashLogoOut 1.15s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+    will-change: transform, opacity;
 }
 
 .splash-logo-img {
-    width: clamp(80px, 16vw, 160px);
+    width: clamp(180px, 22vw, 340px);
     height: auto;
     filter: drop-shadow(0 12px 40px rgba(37, 99, 235, 0.18));
 }
 
 .splash-wordmark {
     font-family: 'Outfit', sans-serif;
-    font-size: clamp(2.6rem, 7vw, 5rem);
+    font-size: clamp(2.8rem, 6vw, 4.5rem);
     font-weight: 800;
     letter-spacing: -0.04em;
     line-height: 1;
@@ -305,7 +308,7 @@ body.reduced-motion *::after {
 }
 
 .splash-tagline {
-    font-size: clamp(0.95rem, 2.5vw, 1.2rem);
+    font-size: clamp(0.95rem, 2vw, 1.3rem);
     font-weight: 500;
     color: var(--color-text-muted);
     letter-spacing: 0.01em;
@@ -323,25 +326,15 @@ body.reduced-motion *::after {
     animation: splashTaglineIn 0.4s ease 0.5s forwards;
 }
 
+/* Slightly larger than final size, settling down to 1.00 — calm, no bounce. */
 @keyframes splashLogoIn {
     from {
         opacity: 0;
-        transform: scale(0.82);
+        transform: scale(1.08);
     }
     to {
         opacity: 1;
         transform: scale(1);
-    }
-}
-
-@keyframes splashLogoOut {
-    from {
-        opacity: 1;
-        transform: scale(1);
-    }
-    to {
-        opacity: 0;
-        transform: scale(0.18) translateY(-20px);
     }
 }
 
@@ -356,9 +349,6 @@ body.reduced-motion *::after {
         animation: none;
         opacity: 1;
         transform: none;
-    }
-    .splash-center.splash-zoom-out {
-        animation: none;
     }
     #signsync-splash.splash-hidden {
         transition-duration: 0.15s;
@@ -441,19 +431,25 @@ body.reduced-motion *::after {
 .header-nav {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 2px;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 .nav-link {
-    padding: 8px 14px;
+    padding: 7px 5px;
     border-radius: var(--radius-sm);
     color: var(--color-text-secondary);
-    font-size: 0.95rem;
+    font-size: 0.82rem;
     font-weight: 600;
     transition: var(--transition-fast);
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 3px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .nav-link:hover {
@@ -471,20 +467,24 @@ body.reduced-motion *::after {
 .header-actions {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 4px;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .wearable-badge {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
+    gap: 4px;
+    padding: 4px 7px;
     background: var(--color-surface-subtle);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-full);
-    font-size: 0.82rem;
+    font-size: 0.72rem;
     font-weight: 600;
     color: var(--color-text-secondary);
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .wearable-dot {
@@ -492,11 +492,12 @@ body.reduced-motion *::after {
     height: 8px;
     border-radius: 50%;
     background: var(--color-blue);
+    flex-shrink: 0;
 }
 
 .header-icon-btn {
-    width: 38px;
-    height: 38px;
+    width: 34px;
+    height: 34px;
     border-radius: var(--radius-sm);
     border: 1px solid var(--color-border);
     background: var(--color-surface);
@@ -504,8 +505,9 @@ body.reduced-motion *::after {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     transition: var(--transition-fast);
+    flex-shrink: 0;
 }
 
 .header-icon-btn:hover {
@@ -515,15 +517,17 @@ body.reduced-motion *::after {
 }
 
 .header-cta-btn {
-    padding: 8px 18px;
+    padding: 8px 12px;
     background: var(--color-blue);
     color: var(--color-text-inverse);
     border-radius: var(--radius-sm);
-    font-size: 0.92rem;
+    font-size: 0.84rem;
     font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 5px;
+    flex-shrink: 0;
+    white-space: nowrap;
     transition: var(--transition-fast);
     box-shadow: var(--shadow-sm);
 }
@@ -1803,15 +1807,46 @@ body.reduced-motion *::after {
 }
 
 .conv-feed-body {
-    height: 520px;
-    max-height: 620px;
-    overflow-y: auto;
-    padding: 18px;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    padding: 14px 16px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 10px;
     background: #fdfdfd;
+    container-type: size;
+}
+
+/* Older messages: a compact, capped-height strip that scrolls on its own so
+   it can never push the current message/avatar out of view. Empty (no
+   history yet) and takes zero space. */
+.conv-history-scroll {
+    flex: 0 1 auto;
+    max-height: 30cqh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 2px;
     scroll-behavior: smooth;
+}
+
+/* The newest message: always fully visible, never scrolls internally. When
+   it carries the full signing avatar (pinned-fill) it grows to consume all
+   remaining vertical space so the avatar can size itself to fit. */
+.conv-current-pinned {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.conv-current-pinned.pinned-fill {
+    flex: 1 1 auto;
+}
+
+.conv-current-pinned.pinned-compact {
+    flex: 0 0 auto;
 }
 
 /* Message Bubbles */
@@ -1825,6 +1860,48 @@ body.reduced-motion *::after {
     position: relative;
     box-shadow: var(--shadow-xs);
     animation: bubbleIn 0.2s ease-out;
+    min-height: 0;
+}
+
+/* Compact history bubbles: shrink padding/typography so many of them can
+   stack without eating the space the current message needs. */
+.conv-msg-bubble.msg-compact {
+    padding: 8px 12px;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.conv-msg-bubble.msg-compact .msg-content-text {
+    font-size: 0.88rem;
+    font-weight: 500;
+}
+
+.conv-msg-bubble.msg-compact .msg-actions-row {
+    margin-top: 0;
+}
+
+.compact-sign-hint {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--color-blue);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* The pinned current message: when it holds the full signing avatar, it must
+   stretch to fill all space the parent hands it, and only the sign
+   visualizer (not the header/text lines) should absorb that extra height. */
+.conv-current-pinned.pinned-fill .conv-msg-bubble {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    max-width: 100%;
+}
+
+.conv-current-pinned.pinned-fill .conv-msg-bubble > .msg-header-row,
+.conv-current-pinned.pinned-fill .conv-msg-bubble > .msg-content-text {
+    flex-shrink: 0;
 }
 
 @keyframes bubbleIn {
@@ -1905,6 +1982,8 @@ body.reduced-motion *::after {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    flex: 1;
+    min-height: 0;
 }
 
 .inline-sign-divider {
@@ -1971,20 +2050,12 @@ body.reduced-motion *::after {
     border-radius: var(--radius-md);
     overflow: hidden;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+    flex: 1;
+    min-height: 0;
 }
 
 .avatar-stage-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 14px;
-    background: #0f172a;
-    border-bottom: 1px solid #1e293b;
-    font-size: 0.76rem;
-    font-weight: 700;
-    color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    display: none;
 }
 
 .avatar-stage-header .isl-tag {
@@ -2002,7 +2073,8 @@ body.reduced-motion *::after {
 .avatar-stage-viewport {
     position: relative;
     width: 100%;
-    min-height: 320px;
+    flex: 1;
+    min-height: 200px;
     background: #090d16;
     display: flex;
     align-items: center;
@@ -2013,7 +2085,6 @@ body.reduced-motion *::after {
 .avatar-stage-img {
     width: 100%;
     height: 100%;
-    min-height: 320px;
     object-fit: contain;
     display: block;
     transition: opacity 0.2s ease, transform 0.25s ease;
@@ -3358,6 +3429,18 @@ kbd {
 /* ==========================================================================
    RESPONSIVE LAYOUT (Desktop, Tablet, Mobile)
    ========================================================================== */
+@media (max-width: 1200px) {
+    /* Free up room for the brand + core nav first: the wearable badge is
+       decorative and safe to drop before anything else gets cramped. */
+    .wearable-badge {
+        display: none;
+    }
+
+    .header-inner {
+        gap: 12px;
+    }
+}
+
 @media (max-width: 1024px) {
     .landing-hero-section {
         grid-template-columns: 1fr;
