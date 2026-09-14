@@ -301,7 +301,10 @@
                     <img src="/static/img/signsyncro_icon.png" alt="SignSyncro" class="footer-logo-img">
                     <div>
                         <strong>SignSyncro</strong> — “Connecting Beyond Words.”
-                        <p class="footer-copy">Manipal University Jaipur PBL-I Project &bull; Inclusive Assistive Communication</p>
+                        <p class="footer-copy">
+                            <button type="button" id="creator-profile-btn" class="footer-creator-link" aria-haspopup="dialog" aria-expanded="false" aria-controls="creator-popup" aria-label="View creator profile: Apoorva Kala">Apoorva Kala</button>
+                            &bull; B.Tech CSE &bull; Manipal University Jaipur
+                        </p>
                     </div>
                 </div>
                 <div class="footer-links">
@@ -309,6 +312,28 @@
                     <a href="#my-signs" class="footer-link">Sign Dictionary</a>
                     <a href="#transcript" class="footer-link">Transcript</a>
                     <a href="#" class="footer-link" id="footer-privacy-btn">Privacy Notice</a>
+                </div>
+
+                <!-- Creator Profile Popup — anchored above the footer, near the trigger name -->
+                <div id="creator-popup" class="creator-popup hidden" role="dialog" aria-modal="false" aria-labelledby="creator-popup-name">
+                    <button type="button" id="creator-popup-close" class="creator-popup-close" aria-label="Close profile card">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                    <img src="/static/img/apoorva_kala.jpg" alt="Portrait of Apoorva Kala" class="creator-popup-photo">
+                    <div class="creator-popup-name" id="creator-popup-name">Apoorva Kala</div>
+                    <div class="creator-popup-role">B.Tech CSE &middot; Manipal University Jaipur</div>
+                    <p class="creator-popup-desc">Computer Science student passionate about AI, Machine Learning, Computer Vision, and assistive technology.</p>
+                    <p class="creator-popup-desc creator-popup-desc-muted">Creator of SignSyncro — an AI-powered communication project connecting sign, speech, and text to make communication more accessible.</p>
+                    <div class="creator-popup-divider"></div>
+                    <div class="creator-popup-links">
+                        <a href="https://github.com/apoorva-6575" target="_blank" rel="noopener noreferrer" class="creator-popup-link">
+                            <i class="fa-brands fa-github"></i> GitHub
+                        </a>
+                        <a href="#" id="creator-linkedin-link" rel="noopener noreferrer" class="creator-popup-link" title="Add your LinkedIn URL">
+                            <i class="fa-brands fa-linkedin"></i> LinkedIn
+                        </a>
+                    </div>
+                    <div class="creator-popup-arrow" aria-hidden="true"></div>
                 </div>
             </div>
         </footer>

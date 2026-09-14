@@ -1870,6 +1870,49 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ================= CREATOR PROFILE POPUP (FOOTER) =================
+    (function CreatorPopup() {
+        const trigger = document.getElementById('creator-profile-btn');
+        const popup = document.getElementById('creator-popup');
+        const closeBtn = document.getElementById('creator-popup-close');
+        if (!trigger || !popup || !closeBtn) return;
+
+        function openPopup() {
+            popup.classList.remove('hidden');
+            trigger.setAttribute('aria-expanded', 'true');
+            document.addEventListener('click', handleOutsideClick, true);
+            document.addEventListener('keydown', handleEscape);
+        }
+
+        function closePopup() {
+            popup.classList.add('hidden');
+            trigger.setAttribute('aria-expanded', 'false');
+            document.removeEventListener('click', handleOutsideClick, true);
+            document.removeEventListener('keydown', handleEscape);
+        }
+
+        function handleOutsideClick(e) {
+            if (!popup.contains(e.target) && e.target !== trigger) {
+                closePopup();
+            }
+        }
+
+        function handleEscape(e) {
+            if (e.key === 'Escape') closePopup();
+        }
+
+        trigger.addEventListener('click', () => {
+            const isOpen = !popup.classList.contains('hidden');
+            if (isOpen) {
+                closePopup();
+            } else {
+                openPopup();
+            }
+        });
+
+        closeBtn.addEventListener('click', closePopup);
+    })();
+
     // Telemetry Collapsible Drawer
     if (telemetryToggleBtn && telemetryBody && telemetryChevron) {
         telemetryToggleBtn.addEventListener('click', () => {
