@@ -1158,27 +1158,14 @@ document.addEventListener('DOMContentLoaded', () => {
                                 ${msg.signData.length > 1 ? `<span class="avatar-counter-badge">Sign ${curIdx + 1} of ${msg.signData.length}</span>` : ''}
                             </div>
 
-                            <!-- Stepper Chips Progression -->
-                            ${msg.signData.length > 1 ? `
-                                <div class="avatar-stepper-wrap" style="padding: 10px 14px 4px;">
-                                    <div class="avatar-stepper">
-                                        ${msg.signData.map((s, idx) => `
-                                            <button class="avatar-step-chip ${idx === curIdx ? 'active' : ''}" data-msg-id="${msg.id}" data-step-idx="${idx}">
-                                                ${idx === curIdx ? '<span class="chip-dot"></span>' : ''}
-                                                <span>${idx + 1}.</span> <strong>${escapeHtml(s.word)}</strong>
-                                            </button>
-                                            ${idx < msg.signData.length - 1 ? '<i class="fa-solid fa-arrow-right inline-step-arrow"></i>' : ''}
-                                        `).join('')}
-                                    </div>
-                                </div>
-                            ` : ''}
-
-                            <!-- Playback Controls & Speed Bar -->
-                            <div class="avatar-playback-bar" style="margin: 8px 12px 10px;">
+                            <!-- Playback Controls & Speed Bar (Prev/Next here already cover
+                                 the same sign-to-sign navigation a separate stepper row
+                                 would add — kept as one compact row instead of two). -->
+                            <div class="avatar-playback-bar" style="margin: 6px 10px;">
                                 <div class="avatar-playback-actions">
                                     ${msg.signData.length > 1 ? `
                                         <button class="avatar-ctrl-btn btn-prev-sign" data-msg-id="${msg.id}" title="Previous sign" ${curIdx === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
-                                            <i class="fa-solid fa-backward-step"></i> Prev
+                                            <i class="fa-solid fa-backward-step"></i>
                                         </button>
                                     ` : ''}
 
@@ -1192,7 +1179,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                                     ${msg.signData.length > 1 ? `
                                         <button class="avatar-ctrl-btn btn-next-sign" data-msg-id="${msg.id}" title="Next sign" ${curIdx >= msg.signData.length - 1 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
-                                            Next <i class="fa-solid fa-forward-step"></i>
+                                            <i class="fa-solid fa-forward-step"></i>
                                         </button>
                                     ` : ''}
                                 </div>
@@ -1207,7 +1194,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
 
                             <!-- Collapsible Technical Details (Subordinate to Visual) -->
-                            <div class="avatar-details-drawer" style="margin: 0 12px 10px;">
+                            <div class="avatar-details-drawer" style="margin: 0 10px 6px;">
                                 <button class="avatar-details-toggle" data-msg-id="${msg.id}">
                                     <span><i class="fa-solid fa-circle-info text-blue"></i> Technical Sign Details</span>
                                     <i class="fa-solid fa-chevron-${msg.detailsOpen ? 'up' : 'down'}"></i>

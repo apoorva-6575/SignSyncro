@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="static/img/signsyncro_logo.png" alt="SignSyncro Logo" width="220"/>
+<img src="static/img/signsyncro_logo.png" alt="SignSyncro Logo" width="340"/>
 
 # SignSyncro
 
