@@ -2074,7 +2074,7 @@ body.reduced-motion *::after {
     position: relative;
     width: 100%;
     flex: 1;
-    min-height: 200px;
+    min-height: 340px;
     background: #090d16;
     display: flex;
     align-items: center;
