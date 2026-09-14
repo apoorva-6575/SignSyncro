@@ -28,75 +28,61 @@
     <!-- Toast Notification Container -->
     <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
-    <!-- ================= GLOBAL HEADER & NAVBAR ================= -->
-    <header class="app-header">
-        <div class="header-inner">
-            <!-- Brand Identity: Logo + Wordmark + Tagline -->
-            <a href="#home" class="header-brand ripple-host" id="brand-home-link" title="SignSyncro - Home" aria-label="SignSyncro home">
-                <img src="/static/img/signsyncro_icon.png" alt="SignSyncro Icon" class="brand-logo-img" id="navbar-logo-img">
-                <div class="brand-info">
-                    <div class="brand-title-row">
-                        <span class="brand-title">SignSyncro</span>
-                    </div>
-                    <span class="brand-tagline">Connecting Beyond Words.</span>
-                </div>
+    <!-- ================= LEFT SIDEBAR NAVIGATION ================= -->
+    <aside class="app-sidebar" id="header-nav" aria-label="Main Navigation">
+        <a href="#home" class="sidebar-brand ripple-host" id="brand-home-link" title="SignSyncro - Home" aria-label="SignSyncro home">
+            <img src="/static/img/signsyncro_icon.png" alt="SignSyncro" class="sidebar-brand-img" id="navbar-logo-img">
+        </a>
+
+        <nav class="sidebar-nav">
+            <a href="#home" class="nav-link sidebar-link ripple-host active" data-view="view-landing" id="nav-home" data-tooltip="Home" aria-label="Home">
+                <i class="fa-solid fa-house"></i>
+                <span class="sidebar-label">Home</span>
             </a>
+            <a href="#how-it-works" class="sidebar-link ripple-host" id="nav-how-it-works" data-tooltip="How It Works" aria-label="How It Works">
+                <i class="fa-solid fa-circle-info"></i>
+                <span class="sidebar-label">How It Works</span>
+            </a>
+            <a href="#my-signs" class="nav-link sidebar-link ripple-host" data-view="view-my-signs" id="nav-my-signs" data-tooltip="My Signs" aria-label="My Signs">
+                <i class="fa-solid fa-book-bookmark"></i>
+                <span class="sidebar-label">My Signs</span>
+            </a>
+            <a href="#transcript" class="nav-link sidebar-link ripple-host" data-view="view-transcript" id="nav-transcript" data-tooltip="Transcript" aria-label="Transcript">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span class="sidebar-label">Transcript</span>
+            </a>
+        </nav>
 
-            <!-- Navigation Links -->
-            <nav class="header-nav" id="header-nav" aria-label="Main Navigation">
-                <a href="#home" class="nav-link ripple-host active" data-view="view-landing" id="nav-home">
-                    <i class="fa-solid fa-house"></i> Home
-                </a>
-                <a href="#communicate" class="nav-link ripple-host" data-view="view-communicate" id="nav-communicate">
-                    <i class="fa-solid fa-hands-asl-interpreting"></i> Communicate
-                </a>
-                <a href="#how-it-works" class="nav-link ripple-host" id="nav-how-it-works">
-                    <i class="fa-solid fa-circle-info"></i> How It Works
-                </a>
-                <a href="#my-signs" class="nav-link ripple-host" data-view="view-my-signs" id="nav-my-signs">
-                    <i class="fa-solid fa-book-bookmark"></i> My Signs
-                </a>
-                <a href="#transcript" class="nav-link ripple-host" data-view="view-transcript" id="nav-transcript">
-                    <i class="fa-solid fa-clock-rotate-left"></i> Transcript
-                </a>
-            </nav>
-
-            <!-- Header Utilities & Actions -->
-            <div class="header-actions">
-                <!-- Wearable Locket Indicator (Concept Prototype) -->
-                <div class="wearable-badge" title="SignSyncro Wear: Wearable Camera Pendant in Prototype Development">
-                    <span class="wearable-dot"></span>
-                    <span>SignSyncro Wear ● Ready</span>
-                </div>
-
-                <!-- Accessibility Drawer Button -->
-                <button id="accessibility-btn" class="header-icon-btn" title="Accessibility Options (♿)" aria-label="Accessibility Settings">
-                    <i class="fa-solid fa-universal-access"></i>
-                </button>
-
-                <!-- Help & Guidance Button -->
-                <button id="help-btn" class="header-icon-btn" title="How SignSyncro Works &amp; Troubleshooting (?)" aria-label="Help">
-                    <i class="fa-solid fa-question"></i>
-                </button>
-
-                <!-- Settings Button -->
-                <button id="settings-btn" class="header-icon-btn" title="System Settings (⚙️)" aria-label="Settings">
-                    <i class="fa-solid fa-gear"></i>
-                </button>
-
-                <!-- Primary Workspace CTA -->
-                <button id="header-start-btn" class="header-cta-btn ripple-host" title="Start Two-Way Communication Workspace">
-                    <i class="fa-solid fa-comments"></i>
-                    <span>Start Communicating</span>
-                </button>
-
-                <!-- Mobile Hamburger Menu Button -->
-                <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle Navigation Menu">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
-            </div>
+        <div class="sidebar-nav-secondary">
+            <button id="accessibility-btn" class="sidebar-link ripple-host" data-tooltip="Accessibility" aria-label="Accessibility Settings">
+                <i class="fa-solid fa-universal-access"></i>
+                <span class="sidebar-label">Accessibility</span>
+            </button>
+            <button id="help-btn" class="sidebar-link ripple-host" data-tooltip="Help" aria-label="Help">
+                <i class="fa-solid fa-question"></i>
+                <span class="sidebar-label">Help</span>
+            </button>
+            <button id="settings-btn" class="sidebar-link ripple-host" data-tooltip="Settings" aria-label="Settings">
+                <i class="fa-solid fa-gear"></i>
+                <span class="sidebar-label">Settings</span>
+            </button>
         </div>
-    </header>
+    </aside>
+
+    <!-- Mobile-only top strip: hamburger to open the sidebar as an overlay -->
+    <div class="mobile-topbar">
+        <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <img src="/static/img/signsyncro_icon.png" alt="SignSyncro" class="mobile-topbar-logo">
+    </div>
+    <div class="sidebar-scrim" id="sidebar-scrim"></div>
+
+    <!-- Persistent primary CTA — always reachable, never buried in navigation -->
+    <button id="header-start-btn" class="floating-cta-btn ripple-host" title="Start Two-Way Communication Workspace">
+        <i class="fa-solid fa-comments"></i>
+        <span>Start Communicating</span>
+    </button>
 
     <!-- ================= VIEW 1: LANDING PAGE ================= -->
     <main id="view-landing" class="view-container active-view">
@@ -342,13 +328,15 @@
     <!-- ================= VIEW 2: MAIN COMMUNICATION WORKSPACE ================= -->
     <main id="view-communicate" class="view-container">
         <div class="comm-workspace">
-            <!-- Top Status Breadcrumb Bar -->
+            <!-- Top Title Bar — no permanent status pills; problems surface as
+                 dismissible toasts only when something actually needs attention. -->
             <div class="comm-top-bar">
                 <div class="comm-breadcrumbs">
                     <span><i class="fa-solid fa-comments text-blue"></i> Communication Workspace</span>
-                    <span class="sub">| Two-Way Assistive Bridge</span>
                 </div>
-                <div class="comm-status-indicators">
+                <!-- Hidden elements kept for JS compatibility (telemetry polling
+                     reads these ids); no longer rendered as a visible status row. -->
+                <div class="comm-status-indicators" hidden>
                     <span id="comm-framing-pill" class="status-pill pill-neutral">
                         <i id="comm-framing-icon" class="fa-regular fa-circle"></i>
                         <span id="comm-framing-text">Awaiting Hands</span>
@@ -374,9 +362,6 @@
                             <div class="panel-card-title">
                                 <span class="panel-sym"><i class="fa-solid fa-video"></i></span>
                                 <span>LIVE CAMERA &bull; SIGN INPUT</span>
-                            </div>
-                            <div class="header-tags">
-                                <span class="badge-tag">3D Kinematic Tracking</span>
                             </div>
                         </div>
 
@@ -580,7 +565,7 @@
         <!-- Academic PBL Telemetry Drawer (Collapsible) -->
         <div class="telemetry-collapsible">
             <button id="telemetry-toggle-btn" class="telemetry-drawer-toggle">
-                <span><i class="fa-solid fa-microchip text-blue"></i> Academic PBL Telemetry &amp; Benchmark Verification (99%+ Accuracy)</span>
+                <span><i class="fa-solid fa-microchip text-blue"></i> Advanced Technical Diagnostics</span>
                 <i id="telemetry-chevron" class="fa-solid fa-chevron-down"></i>
             </button>
             <div id="telemetry-body" class="telemetry-drawer-body hidden">

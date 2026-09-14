@@ -41,7 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
         activeMediaStream: null,
         activeAudioStream: null,
         frameCaptureTimer: null,
-        frameCaptureBusy: false
+        frameCaptureBusy: false,
+        lightingWarningShown: false
     };
 
     // ================= DOM ELEMENTS =================
@@ -200,13 +201,21 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             state.activeMediaStream = stream;
 
+            // Show the browser's own live feed directly — instant, native
+            // frame rate, and never blocked waiting on a server round-trip.
+            // The old approach replaced this image with whatever annotated
+            // frame the last /api/process_frame call happened to return,
+            // which made the visible camera only as fast as that request —
+            // a real source of the reported lag.
             if (cameraCaptureVideo) {
                 cameraCaptureVideo.srcObject = stream;
+                cameraCaptureVideo.style.display = 'block';
+                cameraCaptureVideo.classList.add('camera-stream-img');
                 await cameraCaptureVideo.play().catch(() => {});
             }
+            if (cameraStreamImg) cameraStreamImg.style.display = 'none';
 
             if (standbyEl) standbyEl.classList.add('hidden');
-            if (cameraStreamImg) cameraStreamImg.style.display = 'block';
 
             if (state.frameCaptureTimer) clearInterval(state.frameCaptureTimer);
             state.frameCaptureTimer = setInterval(captureAndSendFrame, 200);
@@ -217,6 +226,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Sends a frame to the backend purely to update gesture/emotion telemetry
+    // (polled separately via /api/status) — it no longer waits for or uses
+    // any image back, since the visible feed is the local <video> above.
     async function captureAndSendFrame() {
         if (!state.isCommunicateActive || state.frameCaptureBusy) return;
         if (!cameraCaptureVideo || cameraCaptureVideo.readyState < 2) return; // HAVE_CURRENT_DATA
@@ -231,16 +243,11 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.drawImage(cameraCaptureVideo, 0, 0, frameCaptureCanvas.width, frameCaptureCanvas.height);
             const dataUrl = frameCaptureCanvas.toDataURL('image/jpeg', 0.7);
 
-            const res = await fetch('/api/process_frame', {
+            await fetch('/api/process_frame', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ image: dataUrl })
             });
-            if (!res.ok) return;
-            const data = await res.json();
-            if (data && data.success && data.annotated_image && cameraStreamImg && state.isCommunicateActive) {
-                cameraStreamImg.src = data.annotated_image;
-            }
         } catch (err) {
             // Transient network hiccup on one frame — not worth surfacing to the user.
         } finally {
@@ -315,6 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (cameraCaptureVideo) {
             cameraCaptureVideo.srcObject = null;
+            cameraCaptureVideo.style.display = 'none';
         }
         const standbyEl = document.getElementById('camera-standby-placeholder');
         if (standbyEl) standbyEl.classList.remove('hidden');
@@ -401,6 +409,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Close mobile menu if open
         if (headerNav) headerNav.classList.remove('mobile-active');
+        const scrimEl = document.getElementById('sidebar-scrim');
+        if (scrimEl) scrimEl.classList.remove('active');
+
+        // The floating "Start Communicating" CTA is redundant once already
+        // in the workspace it links to.
+        if (headerStartBtn) {
+            headerStartBtn.style.display = (targetViewId === 'view-communicate') ? 'none' : '';
+        }
 
         // Scroll to top
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -468,11 +484,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Mobile Hamburger Toggle
+    // Mobile Hamburger Toggle (opens the sidebar as an off-canvas overlay)
+    const sidebarScrim = document.getElementById('sidebar-scrim');
+    function closeMobileSidebar() {
+        if (headerNav) headerNav.classList.remove('mobile-active');
+        if (sidebarScrim) sidebarScrim.classList.remove('active');
+    }
     if (mobileMenuBtn && headerNav) {
         mobileMenuBtn.addEventListener('click', () => {
-            headerNav.classList.toggle('mobile-active');
+            const isOpen = headerNav.classList.toggle('mobile-active');
+            if (sidebarScrim) sidebarScrim.classList.toggle('active', isOpen);
         });
+    }
+    if (sidebarScrim) {
+        sidebarScrim.addEventListener('click', closeMobileSidebar);
     }
 
     // Check Initial Hash
@@ -562,8 +587,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // Lighting indicator
+            // Lighting: no permanent status pill — only speak up when it
+            // actually becomes a problem, once, until it clears again.
             const lighting = data.lighting_status || 'GOOD';
+            if (lighting !== 'GOOD' && !state.lightingWarningShown) {
+                state.lightingWarningShown = true;
+                showToast('Lighting is too low. Try moving to a brighter area.', 'fa-solid fa-lightbulb text-amber');
+            } else if (lighting === 'GOOD') {
+                state.lightingWarningShown = false;
+            }
             if (commLightingPill) {
                 if (lighting === 'GOOD') {
                     commLightingPill.className = 'status-pill pill-good';

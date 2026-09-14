@@ -3,69 +3,75 @@ Sign Language & Emotion Recognition System
 Main Flask Application Server
 High-Precision 95%+ Vision, 3D Kinematics, Sequential Sentence Studio & Analytics
 """
+import os
 import time
+import uuid
 import base64
 import cv2
 import numpy as np
-from flask import Flask, render_template, Response, jsonify, request
+from flask import Flask, render_template, jsonify, request, session
 
 import config
-from camera import VideoCamera
 from gesture_detection import GestureRecognizer
 from emotion_detection import EmotionDetector
 from fusion import MultimodalFusion
 from sentence_engine import SentenceEngine
 
 app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY', 'dev-only-insecure-key-set-SECRET_KEY-in-production')
+app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE='Lax')
 
-# Global System Components
-camera = None
-gesture_recognizer = None
-emotion_detector = None
-fusion_engine = None
-sentence_engine = None
+# ---------------------------------------------------------------------------
+# Per-session state.
+#
+# Every visitor's camera/gesture/sentence state used to live in module-level
+# globals, so every request from every browser/device shared the exact same
+# GestureRecognizer, SentenceEngine, and telemetry dict — one person signing
+# on their phone would show up in a completely different person's laptop
+# conversation. Each browser now gets its own isolated bundle of engines,
+# keyed off an anonymous id stored in a signed session cookie.
+# ---------------------------------------------------------------------------
+SESSIONS = {}
 
-latest_telemetry = {
-    "gesture": config.DEFAULT_GESTURE,
-    "gesture_conf": 0.0,
-    "emotion": "neutral",
-    "emotion_conf": 0.95,
-    "phrase": None,
-    "sentence": "",
-    "sentence_words": [],
-    "suggestions": ["HELLO", "PLEASE", "HELP", "WATER", "FOOD"],
-    "biometrics": {"smile": 0.0, "brow": 0.0, "eye": 0.85},
-    "hold_progress": 0.0,
-    "recording_enabled": True,
-    "hand_framed": "WAITING",
-    "lighting_status": "GOOD",
-    "brightness": 100.0,
-    "is_priority": False,
-    "should_speak": False,
-    "fps": 30.0,
-    "timestamp": ""
-}
+def _default_telemetry():
+    return {
+        "gesture": config.DEFAULT_GESTURE,
+        "gesture_conf": 0.0,
+        "emotion": "neutral",
+        "emotion_conf": 0.95,
+        "phrase": None,
+        "sentence": "",
+        "sentence_words": [],
+        "suggestions": ["HELLO", "PLEASE", "HELP", "WATER", "FOOD"],
+        "biometrics": {"smile": 0.0, "brow": 0.0, "eye": 0.85},
+        "hold_progress": 0.0,
+        "recording_enabled": True,
+        "hand_framed": "WAITING",
+        "lighting_status": "GOOD",
+        "brightness": 100.0,
+        "is_priority": False,
+        "should_speak": False,
+        "fps": 0.0,
+        "timestamp": ""
+    }
 
-# FPS Tracker
-fps_history = []
-
-def init_system():
-    global camera, gesture_recognizer, emotion_detector, fusion_engine, sentence_engine
-    if gesture_recognizer is None:
-        print("[SYSTEM] Initializing 3D Kinematic Gesture Recognizer...")
-        gesture_recognizer = GestureRecognizer()
-    if emotion_detector is None:
-        print("[SYSTEM] Initializing MediaPipe FACS Emotion Detector (95%+)...")
-        emotion_detector = EmotionDetector()
-    if fusion_engine is None:
-        print("[SYSTEM] Initializing Multimodal Fusion Engine...")
-        fusion_engine = MultimodalFusion()
-    if sentence_engine is None:
-        print("[SYSTEM] Initializing Sequential Sentence Construction Engine...")
-        sentence_engine = SentenceEngine()
-    if camera is None:
-        print("[SYSTEM] Starting Camera Stream...")
-        camera = VideoCamera(source=config.CAMERA_INDEX)
+def get_session_state():
+    """Return (creating on first use) this browser's own isolated engine bundle."""
+    if 'sid' not in session:
+        session['sid'] = uuid.uuid4().hex
+        session.permanent = True
+    sid = session['sid']
+    if sid not in SESSIONS:
+        SESSIONS[sid] = {
+            'gesture_recognizer': GestureRecognizer(),
+            'emotion_detector': EmotionDetector(),
+            'fusion_engine': MultimodalFusion(),
+            'sentence_engine': SentenceEngine(),
+            'latest_telemetry': _default_telemetry(),
+            'fps_history': [],
+            'last_upload_frame_time': None,
+        }
+    return SESSIONS[sid]
 
 @app.route('/')
 def index():
@@ -90,95 +96,23 @@ def sanitize_telemetry(data):
             sanitized[k] = str(v)
     return sanitized
 
-def generate_video_stream():
-    global camera, gesture_recognizer, emotion_detector, fusion_engine, sentence_engine, latest_telemetry, fps_history
-    
-    last_frame_time = time.time()
-    
-    while True:
-        frame = camera.get_frame() if camera else None
-        
-        if frame is None:
-            standby = np.zeros((config.FRAME_HEIGHT, config.FRAME_WIDTH, 3), dtype=np.uint8)
-            cv2.putText(standby, "Webcam Initializing / Standby...", (60, 240),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (160, 160, 160), 2)
-            ret, buffer = cv2.imencode('.jpg', standby)
-            frame_bytes = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
-            time.sleep(0.08)
-            continue
-
-        # 1. 3D Hand Gesture Processing
-        gesture, g_conf, frame = gesture_recognizer.process_frame(frame)
-
-        # 2. 95%+ FACS Facial Emotion Processing
-        emotion, e_conf, frame = emotion_detector.process_frame(frame)
-
-        # 3. Sequential Sentence Construction
-        new_word, current_sentence = sentence_engine.update(gesture)
-
-        # 4. Multimodal Context Fusion
-        fusion_result = fusion_engine.fuse(gesture, emotion, g_conf, e_conf)
-
-        # 5. Measure instantaneous FPS
-        now = time.time()
-        fps = 1.0 / max(0.001, now - last_frame_time)
-        last_frame_time = now
-        fps_history.append(fps)
-        if len(fps_history) > 15:
-            fps_history.pop(0)
-        avg_fps = sum(fps_history) / len(fps_history)
-
-        # 6. Update Shared State
-        latest_telemetry.update(sanitize_telemetry({
-            "gesture": gesture,
-            "gesture_conf": g_conf,
-            "emotion": emotion,
-            "emotion_conf": e_conf,
-            "phrase": fusion_result.get("phrase"),
-            "sentence": current_sentence,
-            "sentence_words": sentence_engine.get_words() if sentence_engine else [],
-            "suggestions": sentence_engine.get_suggestions() if sentence_engine else [],
-            "biometrics": emotion_detector.get_telemetry_metrics() if emotion_detector else {},
-            "hold_progress": round(sentence_engine.hold_progress, 2) if sentence_engine else 0.0,
-            "recording_enabled": sentence_engine.recording_enabled if sentence_engine else False,
-            "hand_framed": gesture_recognizer.last_hand_framed if gesture_recognizer else "WAITING",
-            "lighting_status": gesture_recognizer.last_lighting_status if gesture_recognizer else "GOOD",
-            "brightness": round(gesture_recognizer.last_brightness, 1) if gesture_recognizer else 100.0,
-            "is_priority": fusion_result.get("is_priority", False),
-            "should_speak": fusion_result.get("should_speak", False),
-            "fps": round(avg_fps, 1),
-            "timestamp": fusion_result.get("timestamp", "")
-        }))
-
-        # 7. Compress and Stream JPEG
-        ret, buffer = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 85])
-        if not ret:
-            continue
-
-        frame_bytes = buffer.tobytes()
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
-
-@app.route('/video_feed')
-def video_feed():
-    return Response(generate_video_stream(),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
-
 # Browser-side camera capture: the frontend grabs frames from the user's own
-# webcam (getUserMedia) and POSTs them here for inference, instead of the
-# server opening its own camera device (which a cloud host doesn't have).
-# Reuses the exact same detection/fusion/sentence pipeline as the MJPEG path.
-last_upload_frame_time = None
-
+# webcam (getUserMedia) and POSTs them here for inference. The server never
+# opens a camera device itself (a cloud host doesn't have one to open).
+#
+# The response no longer includes a re-encoded annotated frame: the browser
+# now displays its own local <video> feed directly (instant, no server
+# round-trip needed to show the next frame), and this endpoint's only job is
+# to update this session's gesture/emotion telemetry. Skipping that JPEG
+# re-encode + base64 pass on every request is a real latency win on its own,
+# independent of the display change.
 @app.route('/api/process_frame', methods=['POST'])
 def process_frame_route():
-    global gesture_recognizer, emotion_detector, fusion_engine, sentence_engine
-    global latest_telemetry, fps_history, last_upload_frame_time
-
-    if not all([gesture_recognizer, emotion_detector, fusion_engine, sentence_engine]):
-        return jsonify({"success": False, "error": "System not initialized"}), 503
+    state = get_session_state()
+    gesture_recognizer = state['gesture_recognizer']
+    emotion_detector = state['emotion_detector']
+    fusion_engine = state['fusion_engine']
+    sentence_engine = state['sentence_engine']
 
     payload = request.get_json(silent=True) or {}
     image_data = payload.get('image', '')
@@ -207,18 +141,19 @@ def process_frame_route():
     # 4. Multimodal Context Fusion
     fusion_result = fusion_engine.fuse(gesture, emotion, g_conf, e_conf)
 
-    # 5. Measure effective FPS from actual upload cadence
+    # 5. Measure effective FPS from actual upload cadence (this session only)
     now = time.time()
-    if last_upload_frame_time is not None:
-        fps = 1.0 / max(0.001, now - last_upload_frame_time)
+    fps_history = state['fps_history']
+    if state['last_upload_frame_time'] is not None:
+        fps = 1.0 / max(0.001, now - state['last_upload_frame_time'])
         fps_history.append(fps)
         if len(fps_history) > 15:
             fps_history.pop(0)
-    last_upload_frame_time = now
+    state['last_upload_frame_time'] = now
     avg_fps = sum(fps_history) / len(fps_history) if fps_history else 0.0
 
-    # 6. Update Shared State (same telemetry contract /api/status already serves)
-    latest_telemetry.update(sanitize_telemetry({
+    # 6. Update this session's telemetry only
+    state['latest_telemetry'].update(sanitize_telemetry({
         "gesture": gesture,
         "gesture_conf": g_conf,
         "emotion": emotion,
@@ -239,68 +174,51 @@ def process_frame_route():
         "timestamp": fusion_result.get("timestamp", "")
     }))
 
-    # 7. Return the annotated frame (same overlay the MJPEG path drew) so the
-    # browser can show it in place of a raw passthrough feed.
-    ret, buffer = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 80])
-    annotated_b64 = base64.b64encode(buffer.tobytes()).decode('ascii') if ret else None
-
-    return jsonify({
-        "success": True,
-        "annotated_image": f"data:image/jpeg;base64,{annotated_b64}" if annotated_b64 else None
-    })
+    return jsonify({"success": True})
 
 @app.route('/api/status')
 def api_status():
-    return jsonify(sanitize_telemetry(latest_telemetry))
+    state = get_session_state()
+    return jsonify(sanitize_telemetry(state['latest_telemetry']))
 
 @app.route('/api/history')
 def api_history():
-    if fusion_engine:
-        return jsonify(fusion_engine.get_history())
-    return jsonify([])
+    return jsonify(get_session_state()['fusion_engine'].get_history())
 
 @app.route('/api/clear_history', methods=['POST'])
 def api_clear_history():
-    if fusion_engine:
-        fusion_engine.history.clear()
+    get_session_state()['fusion_engine'].history.clear()
     return jsonify({"success": True})
 
 @app.route('/api/sentence/toggle_recording', methods=['POST'])
 def api_sentence_toggle_recording():
-    enabled = True
-    if sentence_engine:
-        enabled = sentence_engine.toggle_recording()
+    enabled = get_session_state()['sentence_engine'].toggle_recording()
     return jsonify({"success": True, "enabled": enabled})
 
 @app.route('/api/sentence/clear', methods=['POST'])
 def api_sentence_clear():
-    if sentence_engine:
-        sentence_engine.clear()
+    get_session_state()['sentence_engine'].clear()
     return jsonify({"success": True})
 
 @app.route('/api/sentence/backspace', methods=['POST'])
 def api_sentence_backspace():
-    words = []
-    if sentence_engine:
-        sentence_engine.backspace()
-        words = sentence_engine.get_words()
-    return jsonify({"success": True, "words": words})
+    sentence_engine = get_session_state()['sentence_engine']
+    sentence_engine.backspace()
+    return jsonify({"success": True, "words": sentence_engine.get_words()})
 
 @app.route('/api/sentence/add_word', methods=['POST'])
 def api_sentence_add_word():
     data = request.get_json(silent=True) or {}
     word = data.get('word', '')
-    new_sentence = ""
-    if sentence_engine:
-        new_sentence = sentence_engine.add_manual_word(word)
-    return jsonify({"success": True, "sentence": new_sentence, "words": sentence_engine.get_words() if sentence_engine else []})
+    sentence_engine = get_session_state()['sentence_engine']
+    new_sentence = sentence_engine.add_manual_word(word)
+    return jsonify({"success": True, "sentence": new_sentence, "words": sentence_engine.get_words()})
 
 @app.route('/api/sentence/add_period', methods=['POST'])
 def api_sentence_add_period():
-    new_sentence = ""
-    if sentence_engine:
-        new_sentence = sentence_engine.add_period()
-    return jsonify({"success": True, "sentence": new_sentence, "words": sentence_engine.get_words() if sentence_engine else []})
+    sentence_engine = get_session_state()['sentence_engine']
+    new_sentence = sentence_engine.add_period()
+    return jsonify({"success": True, "sentence": new_sentence, "words": sentence_engine.get_words()})
 
 SIGN_KNOWLEDGE_BASE = {
     "HELLO": {
@@ -652,9 +570,13 @@ def api_text_to_sign():
 @app.route('/api/export_log')
 def api_export_log():
     """Generates an exportable text summary of the session communication."""
-    if not fusion_engine or not fusion_engine.get_history():
+    state = get_session_state()
+    fusion_engine = state['fusion_engine']
+    sentence_engine = state['sentence_engine']
+
+    if not fusion_engine.get_history():
         return "Sign Language & Emotion Recognition System - Session Log\nNo activity recorded in this session.\n", 200, {'Content-Type': 'text/plain'}
-    
+
     lines = [
         "=" * 65,
         " SIGN LANGUAGE & EMOTION RECOGNITION SYSTEM - SESSION REPORT",
@@ -666,8 +588,8 @@ def api_export_log():
         alert = " [PRIORITY ALERT]" if item.get('priority') else ""
         lines.append(f"[{item['time']}] {idx}. SIGN: {item['gesture']} | EMOTION: {item['emotion'].upper()}{alert}")
         lines.append(f"    SPOKEN PHRASE: \"{item['phrase']}\"\n")
-    
-    if sentence_engine and sentence_engine.get_sentence():
+
+    if sentence_engine.get_sentence():
         lines.append("\nFINAL CONSTRUCTED SENTENCE:")
         lines.append(f"\"{sentence_engine.get_sentence()}\"\n")
     
@@ -676,11 +598,6 @@ def api_export_log():
         'Content-Type': 'text/plain',
         'Content-Disposition': 'attachment; filename="assistive_session_report.txt"'
     }
-
-# Initialize unconditionally at import time so this also runs under a
-# production WSGI server (e.g. gunicorn app:app), which never executes the
-# __main__ block below.
-init_system()
 
 if __name__ == '__main__':
     print("\n" + "="*60)
