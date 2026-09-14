@@ -28,10 +28,61 @@
     <!-- Toast Notification Container -->
     <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
-    <!-- ================= LEFT SIDEBAR NAVIGATION ================= -->
+    <!-- ================= HORIZONTAL NAVBAR (all pages EXCEPT /communicate) ================= -->
+    <header class="app-navbar" id="app-navbar">
+        <div class="app-navbar-inner">
+            <a href="#home" class="navbar-brand brand-home-link ripple-host" title="SignSyncro - Home" aria-label="SignSyncro home">
+                <img src="/static/img/signsyncro_icon.png" alt="SignSyncro" class="navbar-brand-img" id="navbar-logo-img">
+                <div class="navbar-brand-text">
+                    <span class="navbar-brand-name">SignSyncro</span>
+                    <span class="navbar-brand-tagline">Connecting Beyond Words.</span>
+                </div>
+            </a>
+
+            <nav class="navbar-nav" id="navbar-nav" aria-label="Main Navigation">
+                <a href="#home" class="nav-link navbar-link ripple-host active" data-view="view-landing" aria-label="Home">Home</a>
+                <a href="#how-it-works" class="navbar-link how-it-works-link ripple-host" aria-label="How It Works">How It Works</a>
+                <a href="#my-signs" class="nav-link navbar-link ripple-host" data-view="view-my-signs" aria-label="My Signs">My Signs</a>
+                <a href="#transcript" class="nav-link navbar-link ripple-host" data-view="view-transcript" aria-label="Transcript">Transcript</a>
+            </nav>
+
+            <div class="navbar-actions">
+                <button class="navbar-icon-btn accessibility-trigger ripple-host" title="Accessibility Options" aria-label="Accessibility Settings">
+                    <i class="fa-solid fa-universal-access"></i>
+                </button>
+                <button class="navbar-icon-btn help-trigger ripple-host" title="Help" aria-label="Help">
+                    <i class="fa-solid fa-question"></i>
+                </button>
+                <button class="navbar-icon-btn settings-trigger ripple-host" title="Settings" aria-label="Settings">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+                <button class="navbar-cta-btn start-communicating-btn ripple-host" title="Start Two-Way Communication Workspace">
+                    <i class="fa-solid fa-comments"></i>
+                    <span>Start Communicating</span>
+                </button>
+                <button id="navbar-mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+        </div>
+        <nav class="navbar-nav-mobile" id="navbar-nav-mobile" aria-label="Main Navigation (mobile)">
+            <a href="#home" class="nav-link ripple-host active" data-view="view-landing">Home</a>
+            <a href="#how-it-works" class="how-it-works-link ripple-host">How It Works</a>
+            <a href="#my-signs" class="nav-link ripple-host" data-view="view-my-signs">My Signs</a>
+            <a href="#transcript" class="nav-link ripple-host" data-view="view-transcript">Transcript</a>
+            <button class="accessibility-trigger ripple-host">Accessibility</button>
+            <button class="help-trigger ripple-host">Help</button>
+            <button class="settings-trigger ripple-host">Settings</button>
+            <button class="start-communicating-btn navbar-mobile-cta ripple-host">
+                <i class="fa-solid fa-comments"></i> Start Communicating
+            </button>
+        </nav>
+    </header>
+
+    <!-- ================= LEFT ICON RAIL (ONLY on /communicate) ================= -->
     <aside class="app-sidebar" id="header-nav" aria-label="Main Navigation">
-        <a href="#home" class="sidebar-brand ripple-host" id="brand-home-link" title="SignSyncro - Home" aria-label="SignSyncro home">
-            <img src="/static/img/signsyncro_icon.png" alt="SignSyncro" class="sidebar-brand-img" id="navbar-logo-img">
+        <a href="#home" class="sidebar-brand brand-home-link ripple-host" title="SignSyncro - Home" aria-label="SignSyncro home">
+            <img src="/static/img/signsyncro_icon.png" alt="SignSyncro" class="sidebar-brand-img">
         </a>
 
         <nav class="sidebar-nav">
@@ -39,7 +90,7 @@
                 <i class="fa-solid fa-house"></i>
                 <span class="sidebar-label">Home</span>
             </a>
-            <a href="#how-it-works" class="sidebar-link ripple-host" id="nav-how-it-works" data-tooltip="How It Works" aria-label="How It Works">
+            <a href="#how-it-works" class="sidebar-link how-it-works-link ripple-host" data-tooltip="How It Works" aria-label="How It Works">
                 <i class="fa-solid fa-circle-info"></i>
                 <span class="sidebar-label">How It Works</span>
             </a>
@@ -54,22 +105,22 @@
         </nav>
 
         <div class="sidebar-nav-secondary">
-            <button id="accessibility-btn" class="sidebar-link ripple-host" data-tooltip="Accessibility" aria-label="Accessibility Settings">
+            <button class="sidebar-link accessibility-trigger ripple-host" data-tooltip="Accessibility" aria-label="Accessibility Settings">
                 <i class="fa-solid fa-universal-access"></i>
                 <span class="sidebar-label">Accessibility</span>
             </button>
-            <button id="help-btn" class="sidebar-link ripple-host" data-tooltip="Help" aria-label="Help">
+            <button class="sidebar-link help-trigger ripple-host" data-tooltip="Help" aria-label="Help">
                 <i class="fa-solid fa-question"></i>
                 <span class="sidebar-label">Help</span>
             </button>
-            <button id="settings-btn" class="sidebar-link ripple-host" data-tooltip="Settings" aria-label="Settings">
+            <button class="sidebar-link settings-trigger ripple-host" data-tooltip="Settings" aria-label="Settings">
                 <i class="fa-solid fa-gear"></i>
                 <span class="sidebar-label">Settings</span>
             </button>
         </div>
     </aside>
 
-    <!-- Mobile-only top strip: hamburger to open the sidebar as an overlay -->
+    <!-- Mobile-only top strip: hamburger to open the sidebar as an overlay (communicate page only) -->
     <div class="mobile-topbar">
         <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle Navigation Menu">
             <i class="fa-solid fa-bars"></i>
@@ -77,12 +128,6 @@
         <img src="/static/img/signsyncro_icon.png" alt="SignSyncro" class="mobile-topbar-logo">
     </div>
     <div class="sidebar-scrim" id="sidebar-scrim"></div>
-
-    <!-- Persistent primary CTA — always reachable, never buried in navigation -->
-    <button id="header-start-btn" class="floating-cta-btn ripple-host" title="Start Two-Way Communication Workspace">
-        <i class="fa-solid fa-comments"></i>
-        <span>Start Communicating</span>
-    </button>
 
     <!-- ================= VIEW 1: LANDING PAGE ================= -->
     <main id="view-landing" class="view-container active-view">

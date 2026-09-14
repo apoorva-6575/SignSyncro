@@ -86,7 +86,13 @@ body {
     flex-direction: column;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
-    padding-left: 68px; /* room for the fixed left sidebar */
+    padding-top: 64px; /* room for the horizontal navbar (default: every page except /communicate) */
+}
+
+/* /communicate swaps the horizontal navbar for a thin left icon rail */
+body.is-communicate-view {
+    padding-top: 0;
+    padding-left: 52px;
 }
 
 /* Accessible Focus Ring */
@@ -189,25 +195,29 @@ body.reduced-motion *::after {
     position: fixed;
     top: 0;
     left: 0;
-    width: 68px;
+    width: 52px;
     height: 100vh;
     background: var(--color-surface);
     border-right: 1px solid var(--color-border);
-    display: flex;
+    display: none; /* shown only on /communicate via body.is-communicate-view */
     flex-direction: column;
     align-items: center;
-    padding: 14px 0 18px;
+    padding: 12px 0 14px;
     z-index: 1000;
-    gap: 6px;
+    gap: 3px;
+}
+
+body.is-communicate-view .app-sidebar {
+    display: flex;
 }
 
 .sidebar-brand {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
-    border-radius: var(--radius-md);
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
     margin-bottom: 10px;
     flex-shrink: 0;
     transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -218,8 +228,8 @@ body.reduced-motion *::after {
 }
 
 .sidebar-brand-img {
-    width: 38px;
-    height: 38px;
+    width: 28px;
+    height: 28px;
     object-fit: contain;
 }
 
@@ -227,7 +237,7 @@ body.reduced-motion *::after {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    gap: 2px;
     width: 100%;
 }
 
@@ -235,23 +245,23 @@ body.reduced-motion *::after {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    gap: 2px;
     width: 100%;
     margin-top: auto;
-    padding-top: 10px;
+    padding-top: 8px;
     border-top: 1px solid var(--color-border);
 }
 
 .sidebar-link {
     position: relative;
-    width: 44px;
-    height: 44px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
     color: var(--color-text-secondary);
-    font-size: 1.05rem;
+    font-size: 1.2rem; /* ~19px icon glyphs */
     border: none;
     background: transparent;
     cursor: pointer;
@@ -273,7 +283,7 @@ body.reduced-motion *::after {
 .sidebar-link.active::before {
     content: '';
     position: absolute;
-    left: -12px;
+    left: -8px;
     top: 50%;
     transform: translateY(-50%);
     width: 3px;
@@ -318,45 +328,166 @@ body.reduced-motion *::after {
     }
 }
 
-/* Persistent primary CTA */
-.floating-cta-btn {
+/* Mobile-only elements (sidebar's off-canvas helpers), hidden on desktop */
+.mobile-topbar,
+.sidebar-scrim {
+    display: none;
+}
+
+/* ================================================================
+   HORIZONTAL NAVBAR — every page EXCEPT /communicate
+   ================================================================ */
+.app-navbar {
     position: fixed;
-    top: 16px;
-    right: 20px;
-    z-index: 950;
-    display: inline-flex;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    z-index: 1000;
+    box-shadow: var(--shadow-xs);
+}
+
+body.is-communicate-view .app-navbar {
+    display: none;
+}
+
+.app-navbar-inner {
+    max-width: 1440px;
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.navbar-brand {
+    display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 18px;
-    background: var(--color-blue);
-    color: #ffffff;
-    border: none;
-    border-radius: var(--radius-full);
+    text-decoration: none;
+    flex-shrink: 0;
+    margin-right: auto;
+}
+
+.navbar-brand-img {
+    height: 34px;
+    width: auto;
+    object-fit: contain;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.navbar-brand:hover .navbar-brand-img {
+    transform: scale(1.08);
+}
+
+.navbar-brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+}
+
+.navbar-brand-name {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--color-navy);
+    letter-spacing: -0.01em;
+    background: linear-gradient(135deg, var(--color-navy) 0%, var(--color-blue) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    white-space: nowrap;
+}
+
+.navbar-brand-tagline {
+    font-size: 0.66rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+}
+
+.navbar-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    flex: 1;
+}
+
+.navbar-link {
+    padding: 7px 12px;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-secondary);
     font-size: 0.9rem;
-    font-weight: 700;
-    box-shadow: var(--shadow-md);
+    font-weight: 600;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: var(--transition-fast);
+}
+
+.navbar-link:hover,
+.navbar-link:focus-visible {
+    color: var(--color-blue);
+    background: var(--color-blue-subtle);
+}
+
+.navbar-link.active {
+    color: var(--color-blue);
+    background: var(--color-blue-subtle);
+}
+
+.navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.navbar-icon-btn {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
     cursor: pointer;
     transition: var(--transition-fast);
 }
 
-.floating-cta-btn:hover {
+.navbar-icon-btn:hover {
+    background: var(--color-blue-subtle);
+    color: var(--color-blue);
+    border-color: var(--color-blue-border);
+}
+
+.navbar-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 16px;
+    background: var(--color-blue);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.86rem;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.navbar-cta-btn:hover {
     background: var(--color-blue-hover);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-lg);
 }
 
-/* #header-start-btn also carries .ripple-host (position:relative, defined
-   later in this file, so it would otherwise win the cascade on `position`
-   and break the fixed placement). The id selector's higher specificity
-   guarantees this wins regardless of source order. */
-#header-start-btn.floating-cta-btn {
-    position: fixed;
-    overflow: visible;
-}
-
-/* Mobile-only elements, hidden on desktop */
-.mobile-topbar,
-.sidebar-scrim {
+.navbar-nav-mobile {
     display: none;
 }
 
@@ -784,6 +915,9 @@ body.reduced-motion *::after {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    min-width: 0; /* grid items default to min-width:auto, which lets long
+                     text force this wider than its track on narrow screens */
+    max-width: 100%;
 }
 
 .hero-pill-badge {
@@ -1520,12 +1654,12 @@ body.reduced-motion *::after {
    VIEW 2: MAIN COMMUNICATION SCREEN (CORE WORKSPACE)
    ========================================================================== */
 .comm-workspace {
-    max-width: 1480px;
+    max-width: 1680px;
     margin: 0 auto;
-    padding: 16px 20px 16px;
+    padding: 12px 14px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     height: 100vh;
     overflow: hidden;
 }
@@ -1602,7 +1736,7 @@ body.reduced-motion *::after {
 .comm-layout-grid {
     display: grid;
     grid-template-columns: 1.05fr 1fr;
-    gap: 20px;
+    gap: 14px;
     align-items: stretch;
     flex: 1;
     min-height: 0;
@@ -1610,10 +1744,6 @@ body.reduced-motion *::after {
 
 /* Desktop grid layout rule */
 @media (min-width: 992px) {
-    .comm-workspace {
-        padding-bottom: 24px;
-    }
-
     .comm-layout-grid {
         grid-template-columns: 1.05fr 1fr;
     }
@@ -3801,12 +3931,16 @@ kbd {
 }
 
 @media (max-width: 768px) {
-    body {
+    /* Both modes (horizontal navbar / icon sidebar) collapse to the same
+       kind of fixed top strip on mobile — never a persistent left column. */
+    body,
+    body.is-communicate-view {
         padding-left: 0;
-        padding-top: 54px; /* room for the fixed mobile top strip */
+        padding-top: 56px;
     }
 
-    .app-sidebar {
+    /* ---- /communicate: sidebar becomes an off-canvas overlay ---- */
+    body.is-communicate-view .app-sidebar {
         left: -240px;
         width: 220px;
         padding: 16px 0;
@@ -3814,7 +3948,7 @@ kbd {
         box-shadow: var(--shadow-lg);
     }
 
-    .app-sidebar.mobile-active {
+    body.is-communicate-view .app-sidebar.mobile-active {
         left: 0;
     }
 
@@ -3834,7 +3968,7 @@ kbd {
         justify-content: flex-start;
         gap: 12px;
         padding: 11px 12px;
-        font-size: 1rem;
+        font-size: 1.05rem;
     }
 
     .sidebar-link.active::before {
@@ -3852,11 +3986,11 @@ kbd {
         display: none;
     }
 
-    .mobile-menu-btn {
+    body.is-communicate-view .mobile-menu-btn {
         display: flex;
     }
 
-    .mobile-topbar {
+    body.is-communicate-view .mobile-topbar {
         display: flex;
         align-items: center;
         gap: 12px;
@@ -3864,7 +3998,7 @@ kbd {
         top: 0;
         left: 0;
         right: 0;
-        height: 54px;
+        height: 56px;
         background: var(--color-surface);
         border-bottom: 1px solid var(--color-border);
         padding: 0 16px;
@@ -3876,7 +4010,7 @@ kbd {
         width: auto;
     }
 
-    .sidebar-scrim.active {
+    body.is-communicate-view .sidebar-scrim.active {
         display: block;
         position: fixed;
         inset: 0;
@@ -3884,11 +4018,76 @@ kbd {
         z-index: 999;
     }
 
-    .floating-cta-btn {
-        top: 10px;
-        right: 12px;
-        padding: 7px 12px;
-        font-size: 0.82rem;
+    /* ---- every other page: horizontal navbar collapses its center nav
+       behind a hamburger-triggered dropdown ---- */
+    .app-navbar {
+        height: 56px;
+    }
+
+    .navbar-brand-tagline {
+        display: none;
+    }
+
+    .navbar-nav {
+        display: none;
+    }
+
+    /* Too many icon buttons + a text CTA don't fit a narrow top bar — the
+       top strip on mobile is just brand + hamburger; everything else
+       (including Accessibility/Help/Settings/Start Communicating) lives in
+       the dropdown below instead. */
+    .navbar-actions .navbar-icon-btn,
+    .navbar-actions .navbar-cta-btn {
+        display: none;
+    }
+
+    #navbar-mobile-menu-btn {
+        display: flex;
+    }
+
+    .navbar-nav-mobile.mobile-active {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--color-surface);
+        border-bottom: 1px solid var(--color-border);
+        padding: 10px 16px 16px;
+        box-shadow: var(--shadow-lg);
+        max-height: calc(100vh - 56px);
+        overflow-y: auto;
+    }
+
+    .navbar-nav-mobile a,
+    .navbar-nav-mobile button {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 10px 4px;
+        color: var(--color-text-secondary);
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-decoration: none;
+        border: none;
+        border-bottom: 1px solid var(--color-border);
+        background: transparent;
+        cursor: pointer;
+    }
+
+    .navbar-nav-mobile a.active {
+        color: var(--color-blue);
+    }
+
+    .navbar-nav-mobile .navbar-mobile-cta {
+        border-bottom: none;
+        margin-top: 8px;
+        padding: 11px 14px;
+        background: var(--color-blue);
+        color: #ffffff;
+        border-radius: var(--radius-sm);
+        text-align: center;
     }
 
     .hero-title {

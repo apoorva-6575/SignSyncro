@@ -47,14 +47,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ================= DOM ELEMENTS =================
     // View Navigation
+    // Nav links, brand logos, and utility triggers each exist twice in the
+    // DOM — once in the horizontal navbar (shown on every page except
+    // /communicate) and once in the thin icon sidebar (shown only on
+    // /communicate) — so these are queried as groups rather than single ids.
     const navLinks = document.querySelectorAll('.nav-link[data-view]');
     const viewContainers = document.querySelectorAll('.view-container');
-    const headerStartBtn = document.getElementById('header-start-btn');
     const heroStartBtn = document.getElementById('hero-start-btn');
     const ctaStartBtn = document.getElementById('cta-start-btn');
-    const brandHomeLink = document.getElementById('brand-home-link');
+    const startCommunicatingBtns = document.querySelectorAll('.start-communicating-btn');
+    const brandHomeLinks = document.querySelectorAll('.brand-home-link');
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const headerNav = document.getElementById('header-nav');
+    const navbarMobileMenuBtn = document.getElementById('navbar-mobile-menu-btn');
+    const navbarNavMobile = document.getElementById('navbar-nav-mobile');
 
     // Camera & Sign Input
     const cameraStreamImg = document.getElementById('camera-stream');
@@ -407,16 +413,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Close mobile menu if open
+        // Close mobile menus if open (both the sidebar overlay and the
+        // horizontal navbar's mobile dropdown)
         if (headerNav) headerNav.classList.remove('mobile-active');
         const scrimEl = document.getElementById('sidebar-scrim');
         if (scrimEl) scrimEl.classList.remove('active');
+        if (navbarNavMobile) navbarNavMobile.classList.remove('mobile-active');
 
-        // The floating "Start Communicating" CTA is redundant once already
-        // in the workspace it links to.
-        if (headerStartBtn) {
-            headerStartBtn.style.display = (targetViewId === 'view-communicate') ? 'none' : '';
-        }
+        // The icon sidebar is exclusive to /communicate; every other page
+        // uses the normal horizontal navbar. Toggled via a body class so
+        // CSS owns the actual show/hide.
+        document.body.classList.toggle('is-communicate-view', targetViewId === 'view-communicate');
 
         // Scroll to top
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -452,15 +459,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    if (brandHomeLink) {
-        brandHomeLink.addEventListener('click', (e) => {
+    brandHomeLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
             e.preventDefault();
             switchView('view-landing');
         });
-    }
+    });
 
-    // CTA buttons to open communicate workspace
-    [headerStartBtn, heroStartBtn, ctaStartBtn].forEach(btn => {
+    // CTA buttons to open communicate workspace (navbar + sidebar-page
+    // variants, plus the landing page's own hero/footer CTAs)
+    [...startCommunicatingBtns, heroStartBtn, ctaStartBtn].forEach(btn => {
         if (btn) {
             btn.addEventListener('click', () => {
                 switchView('view-communicate');
@@ -470,8 +478,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const heroHowBtn = document.getElementById('hero-how-btn');
-    const navHowItWorks = document.getElementById('nav-how-it-works');
-    [heroHowBtn, navHowItWorks].forEach(btn => {
+    const howItWorksLinks = document.querySelectorAll('.how-it-works-link');
+    [heroHowBtn, ...howItWorksLinks].forEach(btn => {
         if (btn) {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -483,6 +491,26 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
+
+    // Accessibility / Help / Settings triggers exist in both the navbar and
+    // the sidebar — wire every instance to open the same modal.
+    document.querySelectorAll('.accessibility-trigger').forEach(btn => {
+        btn.addEventListener('click', () => openModal(accessibilityModal));
+    });
+    document.querySelectorAll('.help-trigger').forEach(btn => {
+        btn.addEventListener('click', () => openModal(helpModal));
+    });
+    document.querySelectorAll('.settings-trigger').forEach(btn => {
+        btn.addEventListener('click', () => openModal(settingsModal));
+    });
+
+    // Navbar's own mobile dropdown (separate from the sidebar's off-canvas
+    // overlay used on /communicate)
+    if (navbarMobileMenuBtn && navbarNavMobile) {
+        navbarMobileMenuBtn.addEventListener('click', () => {
+            navbarNavMobile.classList.toggle('mobile-active');
+        });
+    }
 
     // Mobile Hamburger Toggle (opens the sidebar as an off-canvas overlay)
     const sidebarScrim = document.getElementById('sidebar-scrim');
@@ -1806,12 +1834,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ================= MODALS & SETTINGS LOGIC =================
+    function openModal(modal) {
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    }
+
     // Accessibility Modal
-    if (accessibilityBtn && accessibilityModal) {
-        accessibilityBtn.addEventListener('click', () => {
-            accessibilityModal.classList.remove('hidden');
-            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-        });
+    if (accessibilityModal) {
         accCloseBtn.addEventListener('click', () => accessibilityModal.classList.add('hidden'));
         accSaveBtn.addEventListener('click', () => {
             accessibilityModal.classList.add('hidden');
@@ -1860,21 +1890,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Help Modal
-    if (helpBtn && helpModal) {
-        helpBtn.addEventListener('click', () => {
-            helpModal.classList.remove('hidden');
-            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-        });
+    if (helpModal) {
         helpCloseBtn.addEventListener('click', () => helpModal.classList.add('hidden'));
         helpOkBtn.addEventListener('click', () => helpModal.classList.add('hidden'));
     }
 
     // Settings Modal
-    if (settingsBtn && settingsModal) {
-        settingsBtn.addEventListener('click', () => {
-            settingsModal.classList.remove('hidden');
-            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-        });
+    if (settingsModal) {
         settingsCloseBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
         settingsSaveBtn.addEventListener('click', () => {
             settingsModal.classList.add('hidden');
