@@ -1877,7 +1877,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const closeBtn = document.getElementById('creator-popup-close');
         if (!trigger || !popup || !closeBtn) return;
 
+        let closeTimer = null;
+
+        function cancelPendingClose() {
+            if (closeTimer) {
+                clearTimeout(closeTimer);
+                closeTimer = null;
+            }
+        }
+
         function openPopup() {
+            cancelPendingClose();
             popup.classList.remove('hidden');
             trigger.setAttribute('aria-expanded', 'true');
             document.addEventListener('click', handleOutsideClick, true);
@@ -1885,10 +1895,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function closePopup() {
+            cancelPendingClose();
             popup.classList.add('hidden');
             trigger.setAttribute('aria-expanded', 'false');
             document.removeEventListener('click', handleOutsideClick, true);
             document.removeEventListener('keydown', handleEscape);
+        }
+
+        // Small delay before closing on mouse-out so moving the cursor from
+        // the name into the card itself doesn't immediately close it.
+        function scheduleClose() {
+            cancelPendingClose();
+            closeTimer = setTimeout(closePopup, 200);
         }
 
         function handleOutsideClick(e) {
@@ -1901,6 +1919,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.key === 'Escape') closePopup();
         }
 
+        // Hover (desktop) — open immediately, close shortly after the
+        // pointer leaves both the trigger and the card.
+        trigger.addEventListener('mouseenter', openPopup);
+        trigger.addEventListener('mouseleave', scheduleClose);
+        popup.addEventListener('mouseenter', cancelPendingClose);
+        popup.addEventListener('mouseleave', scheduleClose);
+
+        // Focus (keyboard) — mirrors hover for accessibility.
+        trigger.addEventListener('focus', openPopup);
+        trigger.addEventListener('blur', scheduleClose);
+
+        // Click / tap (touch devices, and as a toggle fallback).
         trigger.addEventListener('click', () => {
             const isOpen = !popup.classList.contains('hidden');
             if (isOpen) {
